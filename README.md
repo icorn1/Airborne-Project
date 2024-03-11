@@ -9,3 +9,5 @@ The students who worked on this project:
 | Joël Bruinvels   |
 | Ixent Cornella   |
 | Guillermo Forcén |
+
+All the programming was done in Python, Urscript and Tiaportal.
