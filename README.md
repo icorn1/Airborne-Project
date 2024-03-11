@@ -10,4 +10,4 @@ The students who worked on this project:
 | Ixent Cornella   |
 | Guillermo Forcén |
 
-All the programming was done in Python, Urscript and Tiaportal.
+All the programming was done in Python, Urscript and Tiaportal. In this README every code will be explained.
