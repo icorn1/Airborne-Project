@@ -1,7 +1,8 @@
 # airborne composite automation
 
-in this github all the codes will be given that where used to make a project using a universal robot work.
+in this github all the codes will be given that where used to make a demo/experimental robot for airborne composite. All the codes that are given will be explained in this README.
 
+## contact information
 <details>
 <summary> The students who worked on this project: </summary>
 
@@ -14,7 +15,7 @@ in this github all the codes will be given that where used to make a project usi
 
 </details>
 
-All the programming was done in Python, Urscript and Tiaportal. In this README every code will be explained.
+## A Guide to the codes:
 
 <details>
 <summary> Python communication code </summary>
