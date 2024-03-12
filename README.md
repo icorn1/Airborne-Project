@@ -12,7 +12,6 @@ in this github all the codes will be given that where used to make a demo/experi
 | Joël Bruinvels   | joel_bruinvels@live.nl         |
 | Ixent Cornella   | icornellav@gmail.com           |
 | Guillermo Forcén | G.ForcenOrdovas@student.hhs.nl |
-
 </details>
 
 ## A Guide to the codes:
@@ -24,13 +23,25 @@ This is a code written in python and runs on the PC used as host. This code wait
 
 > This code is not completed yet and will be updated until the end of the project. The PC should also exchange communication with a PLC and Festo controller to control the vacuüm cups of the tool end.
 ---
-
 </details>
+
+
 
 <details>
 <summary> Urscript communication code </summary>
   
 This is a code written in urscript and runs on the universal robot which is used as a client. This code moves to the start location, it sends message and a ply ID to the PC. It then waits for coördinates and error code to be send back. If received it sends a verification back that this went succesfully. then it moves the robot to the location of the ply, when done it sends a message to the PC to activate the sucker system. Then it waits a while and moves the ply to the place where the composite is to be build.
+
+> This code is not completed yet and will be updated until the end of the project
+---
+</details>
+
+
+
+<details>
+<summary> Dxf to contour </summary>
+  
+...
 
 > This code is not completed yet and will be updated until the end of the project
 ---
