@@ -6,12 +6,12 @@ in this github all the codes will be given that where used to make a demo/experi
 <details>
 <summary> The students who worked on this project: </summary>
 
-| Name:            |
-|------------------|
-| Jort Leroij      |
-| Joël Bruinvels   |
-| Ixent Cornella   |
-| Guillermo Forcén |
+| Name:            | email:                         |
+|------------------|--------------------------------|
+| Jort Leroij      | jortjorisleroy@gmail.com       |
+| Joël Bruinvels   | joel_bruinvels@live.nl         |
+| Ixent Cornella   | icornellav@gmail.com           |
+| Guillermo Forcén | G.ForcenOrdovas@student.hhs.nl |
 
 </details>
 
