@@ -41,7 +41,7 @@ This is a code written in urscript and runs on the universal robot which is used
 <details>
 <summary> Dxf_to_contour.py </summary>
   
-...
+This python script opens a dxf file that contains the 2D sketches of the ply's that are transported by the universal robot. This script converts the dxf file to png, and extracts all the contours and saves them individually. These contours can then be put into a database and be compared to the reallife ply's. This way defect ply's can be found.
 
 > This code is not completed yet and will be updated until the end of the project
 ---
