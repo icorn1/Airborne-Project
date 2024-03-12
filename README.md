@@ -52,7 +52,7 @@ This python script opens a dxf file that contains the 2D sketches of the ply's t
 <details>
 <summary> contours.py </summary>
   
-...
+This python script accounts for detecting contours. The GUI sends a contour to the laptop which needs to be found in the camera image. This script contains the functions necessary for comparing contours which will allow for the detection of the right contour.
 
 > This code is not completed yet and will be updated until the end of the project
 ---
