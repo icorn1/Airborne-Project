@@ -17,7 +17,7 @@ in this github all the codes will be given that where used to make a demo/experi
 ## A Guide to the codes:
 
 <details>
-<summary> Python communication code </summary>
+<summary> communication_code.py </summary>
   
 This is a code written in python and runs on the PC used as host. This code waits for a connection from the UR. When it gets a connection it reads the ply ID send to it from the UR. Then it runs the code for the camera which analyses the ply's placed on the table and returns the real coördinates of where the ply is to be found and an error code if the ply is defect or can not be found. The PC sends this data to the UR and wait for a verification back. When received it waits for a message to activate the sucker end tool.
 
@@ -28,7 +28,7 @@ This is a code written in python and runs on the PC used as host. This code wait
 
 
 <details>
-<summary> Urscript communication code </summary>
+<summary> communication_code.script </summary>
   
 This is a code written in urscript and runs on the universal robot which is used as a client. This code moves to the start location, it sends message and a ply ID to the PC. It then waits for coördinates and error code to be send back. If received it sends a verification back that this went succesfully. then it moves the robot to the location of the ply, when done it sends a message to the PC to activate the sucker system. Then it waits a while and moves the ply to the place where the composite is to be build.
 
@@ -39,7 +39,7 @@ This is a code written in urscript and runs on the universal robot which is used
 
 
 <details>
-<summary> Dxf to contour </summary>
+<summary> Dxf_to_contour.py </summary>
   
 ...
 
