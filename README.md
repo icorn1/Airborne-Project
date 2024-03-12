@@ -45,5 +45,37 @@ This python script opens a dxf file that contains the 2D sketches of the ply's t
 
 > This code is not completed yet and will be updated until the end of the project
 ---
+</details>
+
+
+
+<details>
+<summary> contours.py </summary>
   
+...
+
+> This code is not completed yet and will be updated until the end of the project
+---
+</details>
+
+
+
+<details>
+<summary> machine_vision_functions.py </summary>
+  
+...
+
+> This code is not completed yet and will be updated until the end of the project
+---
+</details>
+
+
+
+<details>
+<summary> run_machine_vision.py </summary>
+  
+...
+
+> This code is not completed yet and will be updated until the end of the project
+---
 </details>
