@@ -1,81 +1,102 @@
-# the first version of a UR script that accounts for the communication between the PC and the UR.
+# Get variables from GUI
+ply_ID = 3
+port = 50003
 
-# this function does the following:
-#  open socket,
-#  send a ply_ID,
-#  read coordinates and error_code,
-#  if no error:
-#   send succesful,
-#   close socket,
-#   move to location of ply
-#  if error:
-#   go to GUI and say that there is no ply or something
+# basic variables
+z = 0.100
+Rz = 0
+Rx = 3.14
 
-def server_program():
- port = 50003  # choose any free port
 
+# Discription to function start_moving_ply()
+# This function opens a connection to Host, this is the PC used. It sends the command 
+# "moving" to the PC so that the PC knows which function is being run. The ply ID is
+# send to the PC. The PC will send the location of the ply with the right ply ID back.
+# If the ply is not found, an error_code of 1 is returned by the PC and the UR will go
+# to the GUI and there it will ask if you want to skip the ply or chose a new one to fill
+# the place of the missing ply. when the robot is at the ply (error_code = 0) it will
+# send a command to the PC to activate the tool end, which consists of vacuüm cups.
+# After this the robot moves to where the composite should be build.
+
+def start_moving_ply():
  if socket_open("192.168.0.100", port) == True:
+  socket_send_string("moving")
+
   socket_send_string(ply_ID)
   data = socket_read_ascii_float(5, "socket_0")
-  #sleep(1)
 
-  if data[4] == 0:
-
-   socket_send_string("succesful")
-   textmsg(str_cat("error_code: ", data[4]))
-   text = p[data[1]/1000, data[2]/1000, z, data[3], data[4], Rz]
-   textmsg("position: ", text)
+  if data[5] == 0:
+   textmsg(str_cat("error_code: ", data[5]))
    
-   ply_location  = p[data[1]/1000, data[2]/1000, z, data[3], data[4], Rz]
+   ply_location  = p[data[1], data[2], z, data[3], data[4], Rz]
    move_down     = p[0,0,0.1,0,0,0]
    move_up       = p[0,0,-0.1,0,0,0]
-   composite_loc = p[-0.4,0.5,0.1,3.14,0,0]
-
+   composite_loc = p[-0.4,0.5,0.2,3.14,0,0]
+   
+   textmsg("position: ", ply_location)
    movej(ply_location)
    movej(pose_trans(ply_location, move_down))
    socket_send_string("activate")
    sleep(0.3)
    movej(ply_location)
-
-   socket_close("socket_0")
+   movej(composite_loc)
   end
-  if data[4] == 1:
-   textmsg("error_code: 1")
-   socket_send_string("unsuccesful")
 
+  if data[5] == 1:
+   textmsg("error_code: 1")
    # go back to GUI. GUI asks if you need to skip the ply or if you want to select another ply to fill in.
+  end
+  socket_close("socket_0")
+ end
+end
+
+
+# Discription to function calibration()
+# This function first moves the robot to an appropriate location from where to start
+# the rest of all the actions. The function opens a connection to Host, this is the 
+# PC used. It sends the command "clibration" to the PC so that the PC knows which 
+# function is being run. The function gets an error code 0 or 1 from the PC, 0 means
+# that a new pose can be send by the PC, 1 means that no poses can be send, this happens
+# when all poses have been done already. If the error code is 0 the robot will move
+# to the pose it gets from the PC and then send to the PC that the PC can make a
+# picture. The robot waits for a while to give time to the PC to make the picture
+
+def calibration():
+ movej(p[-0.400, 0.000, 0.300, 0, 0, 0])
+
+ while socket_open("192.168.0.100", port) == True:
+  socket_send_string("calibration")
+  error = socket_read_ascii_float(1, "socket_0")
+
+  if error[1] == 1:
+   movej(p[-0.250, -0.570, 0.300, 0, 0, 0])
+   movej(p[-0.250, -0.570, 0.300, 0.93, 1.16, 0])
+   movej(p[-0.250, -0.570, 0.300, 2.0, 2.5, 0])
+   socket_close("socket_0")
+   break
+  end
+
+  if error[1] == 0:
+   data = socket_read_ascii_float(6, "socket_0")
+   calibration_location = p[data[1], data[2], data[3], data[4], data[5], data[6]]
+   movej(calibration_location)
+   socket_send_string("ready for picture")
+   sleep(2)
+   socket_close("socket_0")
   end
  end
 end
 
-# Get variables from GUI
-ply_ID = 3
 
-# basic variables
-z = 0.150
-Rz = 0
+# Discription to start_location()
+# move the robot to the start location.
 
-# move to start location.
-# use function to move to the location of the ply.
+def start_location():
+ movej(p[-0.400, 0.000, 0.100, 3.14, 0, 0])
+end
 
-
-# disable the movements while testing sockets
-movej(p[-0.400, 0.000, 0.100, 3.14, 0, 0])
-server_program()
-
-
-# lower tool.
-# activate the right vacuum cups.
-# move up.
-
-# check if ply is attached to the tool end. (with appropriate sensor)
-# let sensor send error_code back. (0 if ply attached, 1 if ply not attached)
-
-# move to other table with a variable (speed, orientation, location)
-# lower tool.
-# deactivate vacuum cups
-# move up.
-# move to start location.
-# check is composite is allright with second camera.
+start_location()
+#start_moving_ply()  # Uncomment if you want to start picking up the ply's.
+#calibration()       # Uncomment if you want to preform an automatic calibration.
 
 halt
