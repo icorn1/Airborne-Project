@@ -168,13 +168,15 @@ def calculate_angles(angle):
     return x, y
 
 
-def get_ply_information(contour, M, show_plot=False):
+def get_ply_information(contour, T, show_plot=False):
     n, optimal_translation_vector, optimal_rotation_angle, grid_points, grid_points_inside_contour, optimal_indices = \
         optimize_grid(contour)
     translated_grid_points = grid_points[:, 0:2] + optimal_translation_vector
     grid_center_x = np.mean(grid_points[:, 0])
     grid_center_y = np.mean(grid_points[:, 1])
-    robot_pose = M @ np.array([grid_center_x, grid_center_y, 1, 1])
+    pose_x = grid_center_x * T[0, 0] + T[0, 1]
+    pose_y = -(grid_center_y * T[1, 0] + T[1, 1])  # Negate the y-coordinate
+    robot_pose = [pose_x, pose_y]
     Rx, Ry = calculate_angles(optimal_rotation_angle)
     indices = np.zeros(32)
     indices[:len(optimal_indices)] = np.array(optimal_indices) + 1
@@ -199,3 +201,5 @@ def get_ply_information(contour, M, show_plot=False):
         cv2.imshow('Optimal Position, Rotation, and Grid Points Inside Contour', image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+    error_code = 0
+    return robot_pose[0], robot_pose[1], Rx, Ry, error_code, indices
