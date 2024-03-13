@@ -79,3 +79,13 @@ This python script accounts for detecting contours. The GUI sends a contour to t
 > This code is not completed yet and will be updated until the end of the project
 ---
 </details>
+
+
+<details>
+<summary> calibrate.py </summary>
+  
+This file is used for storing the calibration functions. These functions allow for the calibration of the camera to the universal robot. Required for its use are the images and robot poses captured during the calibration. The function returns a translation matrix which can be used for converting camera coordinates to their corresponding robot pose. 
+
+> This code is not completed yet and will be updated until the end of the project
+---
+</details>
