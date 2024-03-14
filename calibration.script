@@ -37,3 +37,4 @@ end
 port = 50003
 start_location()
 calibration()
+halt
