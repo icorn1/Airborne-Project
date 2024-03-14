@@ -1,4 +1,5 @@
 import socket
+import snap7
 import numpy as np
 import os
 import telnetlib
@@ -8,6 +9,7 @@ from time import sleep
 from contours import find_most_similar_contour
 from machine_vision_functions import get_ply_information
 from calibrate import calibrate, undistort_image
+from PLC_communication import write_values
 
 
 def format_nums(integers):
@@ -115,19 +117,22 @@ def send_ply_information():
     print("PC: Data send to UR")
 
     if error_code == 0:
+        plc = snap7.client.Client()
+        plc.connect('192.168.0.1', 0, 1)  # IP address, rack, slot (from HW settings)
+        print("PC: connecting to the PLC")
         print("PC: error_code: 0 \n")
 
         data = client_socket.recv(1024).decode()
         print("UR:", data, "vacuum cups \n")
         print("PC: activating vacuüm cups:", cup_array, "\n \n")
 
-        # Send to the PLC activate vacuum cups
+        write_values(indices, 1, 24)
         
         data = client_socket.recv(1024).decode()
         print("UR:", data, "vacuum cups \n")
         print("PC: Deactivate vacuüm cups:", cup_array, "\n \n")
 
-        # Send to the PLC deactivate vacuum cups
+        write_values(indices, 0, 24)
 
     if error_code == 1:
         print("PC: error_code: 1 \n \n")
