@@ -121,6 +121,14 @@ def send_ply_information():
         print("UR:", data, "vacuum cups \n")
         print("PC: activating vacuüm cups:", cup_array, "\n \n")
 
+        # Send to the PLC activate vacuum cups
+        
+        data = client_socket.recv(1024).decode()
+        print("UR:", data, "vacuum cups \n")
+        print("PC: Deactivate vacuüm cups:", cup_array, "\n \n")
+
+        # Send to the PLC deactivate vacuum cups
+
     if error_code == 1:
         print("PC: error_code: 1 \n \n")
 
