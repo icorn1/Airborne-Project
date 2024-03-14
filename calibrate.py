@@ -28,16 +28,18 @@ def undistort_image(img, dist, imx):
     return dist
 
 
-def find_chessboard_corners(images, pattern_size, dist, imx):
+def find_chessboard_corners(images, pattern_size, dist, imx, distortion=True):
     """Finds the chessboard patterns and, if ShowImage is True, shows the images with the corners"""
 
     chessboard_corners = []
     IndexWithImg = []
-    undistorted = None
+    undistorted = images[0]
     i = 0
     print("Finding corners...")
     for image in images:
-        undistorted = undistort_image(image, dist, imx)
+        undistorted = image
+        if distortion:
+            undistorted = undistort_image(image, dist, imx)
         gray = cv2.cvtColor(undistorted, cv2.COLOR_BGR2GRAY)
         _, mask = cv2.threshold(gray, 130, 255, 1)
         ret, corners = cv2.findChessboardCorners(mask, pattern_size, flags=cv2.CALIB_CB_ADAPTIVE_THRESH +
@@ -88,13 +90,13 @@ def save_translation_matrix(img_corners, poses, square_size, grid_size, print_ms
     mse_y = np.sqrt(np.mean((y_obj - fit_line_y) ** 2))
 
     matrix = np.array([[s_x[0], s_x[1]], [s_y[0], s_y[1]]])
-    np.savez('Translation.npz', matrix)
+    np.savez('calibration_matrices/Translation.npz', matrix)
     if print_mse:
         print(f"MSE x-calibration: {mse_x}\n"
               f"MSE y-calibration: {mse_y}")
 
 
-def calibrate(image_folder, robot_pose_file, mtx_file, dst_file, square_size, grid_size):
+def calibrate(image_folder, robot_pose_file, mtx_file, dst_file, square_size, grid_size, distortion=True):
     image_files = sorted(glob.glob(f'{image_folder}/*.png'))
     images = [cv2.imread(f) for f in image_files]
     loaded_array = np.loadtxt(robot_pose_file)
@@ -103,7 +105,30 @@ def calibrate(image_folder, robot_pose_file, mtx_file, dst_file, square_size, gr
     dst_data = np.load(dst_file)
     dst = dst_data['arr_0'].astype(np.float64)
 
+    image_corners, IndexWithImg, img = find_chessboard_corners(images, grid_size, dst, mtx, distortion=distortion)
+    if not distortion:
+        mtx, dist = calculate_intrinsics(image_corners, IndexWithImg, (5, 5), 30, images[0].shape[:2])
     image_corners, IndexWithImg, img = find_chessboard_corners(images, grid_size, dst, mtx)
     robot_poses = [loaded_array[i] for i in IndexWithImg]
 
     save_translation_matrix(image_corners, robot_poses, square_size, (7, 7))
+
+
+def calculate_intrinsics(chessboard_corners, IndexWithImg, pattern_size, square_size, ImgSize,
+                         ShowProjectError=False):
+    """Calculates the intrinc camera parameters fx, fy, cx, cy from the images"""
+
+    # Find the corners of the chessboard in the image
+    imgpoints = chessboard_corners
+    # Find the corners of the chessboard in the real world
+    objpoints = []
+    for i in range(len(IndexWithImg)):
+        objp = np.zeros((pattern_size[0] * pattern_size[1], 3), np.float32)
+        objp[:, :2] = np.mgrid[0:pattern_size[0], 0:pattern_size[1]].T.reshape(-1, 2) * square_size
+        objpoints.append(objp)
+
+    # Find the intrinsic matrix
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, ImgSize, None, None)
+    np.savez("calibration_matrices/IntrinsicMatrixtest.npz", mtx)
+    np.savez("calibration_matrices/DistortionMatrixtest.npz", dist)
+    return mtx, dist
