@@ -30,6 +30,7 @@ def start_moving_ply():
    sleep(0.3)
    movej(ply_location)
    movej(composite_loc)
+   socket_send_string("Deactivate")
   end
 
   if data[5] == 1:
