@@ -89,3 +89,12 @@ This file is used for storing the calibration functions. These functions allow f
 > This code is not completed yet and will be updated until the end of the project
 ---
 </details>
+
+<details>
+<summary> PLC_communication.py </summary>
+  
+This file is used for storing the function for communicating to the PLC.
+
+> This code is not completed yet and will be updated until the end of the project
+---
+</details>
