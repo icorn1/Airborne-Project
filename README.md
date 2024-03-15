@@ -18,7 +18,7 @@ In this github, we aim to share the code for the project we (students from THUAS
 ## A Guide to the codes:
 
 <details>
-**<summary> main_communication_code.py </summary>**
+<summary> ##main_communication_code.py </summary>
   
 This is the main code that is run in python on the PC. The PC is the host and the Universal Robot (UR) and PLC are the clients. 
 This code is the main code and is simple to use: Download all the python codes onto the PC and the URScripts onto the robot and run the code on the PC. Than for the rest everything can be done from the GUI on the robot.
