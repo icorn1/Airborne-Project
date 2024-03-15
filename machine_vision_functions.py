@@ -19,14 +19,14 @@ def generate_grid(contour):
     centroid_y = int(M['m01'] / M['m00'])
 
     # Generate a 4x8 grid with specified x and y spacing
-    grid_rows, grid_cols = 4, 8
+    grid_rows, grid_cols = 4, 6
     x_spacing, y_spacing = 6 * cm, 40 / 6 * cm
 
     grid_points = []
     index = 1  # Starting index
 
-    for j in range(grid_cols, 0, -1):
-        for i in range(grid_rows, 0, -1):
+    for j in range(0, grid_cols, 1):
+        for i in range(0, grid_rows, 1):
             x = j * x_spacing
             y = i * y_spacing
             grid_points.append((x, y, index))
@@ -81,7 +81,7 @@ def optimize_grid(contour):
             rotated_points = cv2.transform(np.array([translated_grid_points]), rotation_matrix)[0]
 
             # Count the number of points inside the contour
-            radius = 5
+            radius = 19
             points_inside_contour = np.sum(np.array(
                 [cv2.pointPolygonTest(contour, tuple(map(int, point)), True) >= radius for point in
                  rotated_points]))
@@ -176,17 +176,16 @@ def get_ply_information(contour, T, show_plot=False):
     grid_center_y = np.mean(grid_points[:, 1])
     pose_x = grid_center_x * T[0, 0] + T[0, 1]
     pose_y = -(grid_center_y * T[1, 0] + T[1, 1])  # Negate the y-coordinate
-    robot_pose = [pose_x, pose_y]
+    robot_pose = np.array([pose_x, pose_y]) / 1000
     Rx, Ry = calculate_angles(optimal_rotation_angle)
-    indices = np.zeros(32)
-    indices[:len(optimal_indices)] = np.array(optimal_indices) + 1
+    indices = np.array(optimal_indices)
     if show_plot:
         print(f"Number of ponts: {n}\n"
               f"Angle: {optimal_rotation_angle}, (x, y) : ({grid_center_x}, {grid_center_y})\n"
               f"Robot info: (x, y, z, Rx, Ry, Rz): {(robot_pose[0], robot_pose[1], 10, Rx, Ry, 0)}\n"
               f"Vacuum cups: {indices}")
 
-        image_size = (600, 800)
+        image_size = (295, 530)
         image = np.ones((image_size[0], image_size[1], 3), dtype=np.uint8) * 0
         cv2.drawContours(image, [contour], -1, (0, 0, 255), thickness=cv2.FILLED)
         rotation_matrix = cv2.getRotationMatrix2D(
@@ -196,7 +195,7 @@ def get_ply_information(contour, T, show_plot=False):
         for point in final_rotated_grid_points:
             cv2.circle(image, tuple(map(int, point)), 2, (255, 0, 0), -1)
         for point in grid_points_inside_contour:
-            cv2.circle(image, tuple(map(int, point)), 5, (0, 255, 0), -1)
+            cv2.circle(image, tuple(map(int, point)), 22, (0, 255, 0), -1)
 
         cv2.imshow('Optimal Position, Rotation, and Grid Points Inside Contour', image)
         cv2.waitKey(0)
