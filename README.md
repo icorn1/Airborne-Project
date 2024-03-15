@@ -19,7 +19,7 @@ In this github, we aim to share the code for the project we (students from THUAS
 
 <detail>
  <summary>Explenation of the python codes</summary>
- <detail>
+ <detail >
   <summary>a summary</summary>
  </detail>
 </detail>
