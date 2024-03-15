@@ -41,6 +41,7 @@ This is a code written in urscript and runs on the universal robot which is used
 
 <details>
 <summary><i>calibration.script</i></summary>
+  
 This code is written in urscript and runs on the UR. This code communicates with the PC and preforms the calibration automaticaly. All that needs to be done is that the tool end needs to be manually replaced with the calibration tool. This code is executed when on the GUI of the robot the button "start calibration" is pressed. After executing this code the robot will move to a few locations and will pause at every location for the camera to take a picture. The picture and the pose are then compared on the PC and the calibration is finished.
 
 > This code is not completed yet and will be updated until the end of the project
