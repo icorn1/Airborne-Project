@@ -1,10 +1,11 @@
-# airborne composite automation
+# Airborne Composite Automation
 
-in this github all the codes will be given that where used to make a demo/experimental robot for airborne composite. All the codes that are given will be explained in this README.
+In this github, we aim to share the code for the project we (students from THUAS) developed for a demonstration/experimental Universal Robot. The robot mimics an actual industrial robot from Airborne's facilities (which you can see it with more detail here: https://youtu.be/NmRDtkKQZAs), that way the company can use it for divulgation and demonstration puroposes at fairs and events, and expermiental testing of grippers or End Effectors on a smaller robot instead of the actual industrial robot. 
 
-## contact information
+
+## Contact Information
 <details>
-<summary> The students who worked on this project: </summary>
+<summary> The students who worked on this project are: </summary>
 
 | Name:            | email:                         |
 |------------------|--------------------------------|
