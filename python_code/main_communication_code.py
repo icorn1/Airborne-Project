@@ -1,15 +1,20 @@
-import socket
-import snap7
-import numpy as np
-import os
-import telnetlib
-import cv2
-from ftplib import FTP
-from time import sleep
-from contours import find_most_similar_contour
 from machine_vision_functions import get_ply_information
 from calibrate import calibrate, undistort_image
+from contours import find_most_similar_contour
 from PLC_communication import write_values
+from ftplib import FTP
+from time import sleep
+import numpy as np
+import telnetlib
+import socket
+import snap7
+import os
+import cv2
+
+# Variables
+MASKING_THRESHOLD = 254
+INVERT_MASK = 0
+MINIMUM_CONTOUR_AREA = 200
 
 
 def format_nums(integers):
@@ -26,7 +31,7 @@ def get_cognex_image():
     # cognex's config
     ip = "192.168.0.10"
     user = 'admin'
-#    password = ''
+    #    password = ''
 
     # telnet login
     tn = telnetlib.Telnet(ip, 10000)
@@ -94,17 +99,16 @@ def send_ply_information():
     image = get_cognex_image()
     image = undistort_image(image, dst, mtx)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _, mask = cv2.threshold(gray, 254, 255, 0)
+    _, mask = cv2.threshold(gray, MASKING_THRESHOLD, 255, INVERT_MASK)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contours = [contour for contour in contours if cv2.contourArea(contour) > 200]
+    contours = [contour for contour in contours if cv2.contourArea(contour) > MINIMUM_CONTOUR_AREA]
     cv2.drawContours(image, contours, -1, (0, 255, 255), 3)
     # cv2.imshow('img', image)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
     min_index = find_most_similar_contour('contours', '1_mesh_contour.txt', contours, show_plot=False)
-    x, y, rx, ry, error_code, cup_array = get_ply_information(contours[min_index], T, show_plot=True)
+    x, y, rx, ry, error_code, cup_array = get_ply_information(contours[min_index], T, show_plot=False)
 
-    # x, y, rx, ry, error_code, cup_array = camera_data()
     print("PC: sending: x:", x, "| y:", y, "| Rz:", rx, "| Ry:", ry)
 
     client_socket.send(format_nums((x, y, rx, ry, error_code)).encode())
@@ -120,17 +124,16 @@ def send_ply_information():
         print("UR:", data, "vacuum cups \n")
         print("PC: activating vacuüm cups:", cup_array, "\n \n")
 
-        write_values(plc, cup_array, 1, 24)
-        
+        write_values(plc, cup_array, 1)
+
         data = client_socket.recv(1024).decode()
         print("UR:", data, "vacuum cups \n")
         print("PC: Deactivate vacuüm cups:", cup_array, "\n \n")
 
-        write_values(plc, cup_array, 0, 24)
+        write_values(plc, cup_array, 0)
 
     if error_code == 1:
         print("PC: error_code: 1 \n \n")
-
 
 
 """
@@ -142,27 +145,27 @@ if __name__ == '__main__':
     server_socket = socket.socket(socket.AF_INET,
                                   socket.SOCK_STREAM)  # Create a socket object and bind the socket to the host and port
     server_socket.bind((host, port))
-    
+
     """
     This while loop does the following:
         wait for a signal,
         accept signal,
         ... update this code ...
     """
-    
+
     while True:
         server_socket.listen(5)
         print("PC: Waiting for client connection...")
         client_socket, address = server_socket.accept()
         print("PC: Connected \n")
         task = client_socket.recv(1024).decode()
-    
+
         if task == "calibration":
             print("UR: start calibration")
             perform_calibration()
             calibrate('calibration_images', 'robot_poses/custom_poses.txt', 'calibration_matrices/IntrinsicMatrix.npz',
-                      'calibration_matrices/DistortionMatrix.npz', 30, (5, 5), distortion=True)
-    
+                      'calibration_matrices/DistortionMatrix.npz', distortion=True)
+
         elif task == "moving":
             print("UR: start moving ply's")
             send_ply_information()
