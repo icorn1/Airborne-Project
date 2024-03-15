@@ -66,6 +66,7 @@ This file is used for storing the function for communicating to the PLC.
 </details>
 
 <details><summary><b>Explanation of URScript code</b></summary>
+      <br />
       <details><summary><i>start_moving_ply.script</i></summary>
   
 This is a code written in urscript and runs on the universal robot which is used as a client. This code is activated when the ply's needs to be moved and a composite needs to be made. The current version of this code works together with the PC to find 1 single ply, it does not matter which ply, pick this ply up and place it on another location. This code is executed when on the GUI of the robot the button "start moving ply's" is pressed.
