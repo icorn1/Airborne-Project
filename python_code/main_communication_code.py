@@ -26,7 +26,7 @@ def get_cognex_image():
     # cognex's config
     ip = "192.168.0.10"
     user = 'admin'
-    password = ''
+#    password = ''
 
     # telnet login
     tn = telnetlib.Telnet(ip, 10000)
