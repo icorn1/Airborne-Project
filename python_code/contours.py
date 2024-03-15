@@ -1,6 +1,12 @@
 import cv2
 import numpy as np
 
+# Variables
+IMAGE_SIZE = (600, 800)  # Camera image size post undistortion
+RESIZED_IMAGE_SIZE = (300, 300)  # Your preferred resized image size
+CONTOUR_PNG_IMAGE_SIZE = (2330, 1777)  # The image size of the generated contour PNG file
+NUM_POLYGON_POINTS = 5  # The number of points used to create the random contour polygon
+
 
 def create_random_contour(angle=45, seed=0, show_plot=False):
     """
@@ -13,13 +19,11 @@ def create_random_contour(angle=45, seed=0, show_plot=False):
     :return: Tuple containing the original and rotated contours.
     """
     # Create a white image
-    image_size = (600, 800)
-    image = np.ones((image_size[0], image_size[1], 3), dtype=np.uint8) * 0
+    image = np.ones((IMAGE_SIZE[0], IMAGE_SIZE[1], 3), dtype=np.uint8) * 0
 
     # Generate a random squiggly shape
     np.random.seed(seed)
-    num_points = 5
-    squiggly_shape_points = np.random.randint(50, 450, size=(num_points, 2))
+    squiggly_shape_points = np.random.randint(50, 450, size=(NUM_POLYGON_POINTS, 2))
 
     # Convert the squiggly_shape_points to a closed contour
     squiggly_shape_contour = np.array([squiggly_shape_points], dtype=np.int32)
@@ -37,7 +41,7 @@ def create_random_contour(angle=45, seed=0, show_plot=False):
 
     if show_plot:
         # Make a new images with just the contours
-        image = np.ones((image_size[0], image_size[1], 3), dtype=np.uint8) * 0
+        image = np.ones((IMAGE_SIZE[0], IMAGE_SIZE[1], 3), dtype=np.uint8) * 0
         cv2.drawContours(image, [rot], -1, (0, 0, 255), 3)
         cv2.drawContours(image, [contour], -1, (255, 0, 0), 3)
 
@@ -110,10 +114,10 @@ def normalize_img(img):
     cnt, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     bounding_rect = cv2.boundingRect(cnt[0])
     img_cropped_bounding_rect = img[bounding_rect[1]:bounding_rect[1] + bounding_rect[3],
-                                    bounding_rect[0]:bounding_rect[0] + bounding_rect[2]]
+                                bounding_rect[0]:bounding_rect[0] + bounding_rect[2]]
 
     # resize all to same size
-    img_resized = cv2.resize(img_cropped_bounding_rect, (300, 300))
+    img_resized = cv2.resize(img_cropped_bounding_rect, RESIZED_IMAGE_SIZE)
     return img_resized
 
 
@@ -127,19 +131,17 @@ def compare_contours(cnt1, cnt2, show_plot=False):
 
     :return: Similarity score between the two contours using matchShapes method.
     """
-    image_size = (600, 800)
+    img1 = np.ones((CONTOUR_PNG_IMAGE_SIZE[0], CONTOUR_PNG_IMAGE_SIZE[1], 3), dtype=np.uint8) * 0
+    cv2.drawContours(img1, [cnt1], -1, (0, 0, 255), 3)
 
-    img1 = np.ones((image_size[0], image_size[1], 3), dtype=np.uint8) * 0
-    cv2.drawContours(img1, cnt1, -1, (0, 0, 255), 3)
-
-    img2 = np.ones((image_size[0], image_size[1], 3), dtype=np.uint8) * 0
+    img2 = np.ones((IMAGE_SIZE[0], IMAGE_SIZE[1], 3), dtype=np.uint8) * 0
     cv2.drawContours(img2, cnt2, -1, (255, 0, 0), 3)
 
     rot_img1 = rotate_contour(img1, [cnt1])
     norm_img1 = normalize_img(rot_img1)
     cnt1, _ = cv2.findContours(norm_img1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    rot_img2 = rotate_contour(img2, [cnt2], angle=270)
+    rot_img2 = rotate_contour(img2, [cnt2])
     norm_img2 = normalize_img(rot_img2)
     cnt2, _ = cv2.findContours(norm_img2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -147,8 +149,7 @@ def compare_contours(cnt1, cnt2, show_plot=False):
 
     if show_plot:
         print(f"The similarity score is : ""{:e}".format(similarity_score))
-        image_size = (300, 300)
-        image = np.ones((image_size[0], image_size[1], 3), dtype=np.uint8) * 0
+        image = np.ones((RESIZED_IMAGE_SIZE[0], RESIZED_IMAGE_SIZE[1], 3), dtype=np.uint8) * 0
         cv2.drawContours(image, cnt1, -1, (0, 0, 255), 3)
         cv2.drawContours(image, cnt2, -1, (255, 0, 0), 3)
         cv2.imshow('Image', image)
@@ -169,6 +170,7 @@ def find_most_similar_contour(input_folder, contour_name, contours, show_plot=Fa
     :param show_plot: Whether to display a plot showing the original contours and their similarity score (default is False).
     """
     loaded_contour = load_contour(f'{input_folder}/{contour_name}')
+
     score = []
     for contour in contours:
         score.append(compare_contours(loaded_contour, contour, show_plot=show_plot))
