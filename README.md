@@ -64,7 +64,7 @@ This file is used for storing the function for communicating to the PLC.
 ---
 </details>
 </details>
-
+<br />
 <details><summary><b>Explanation of URScript code</b></summary>
       <br />
       <details><summary><i>start_moving_ply.script</i></summary>
