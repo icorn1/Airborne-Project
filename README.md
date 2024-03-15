@@ -33,7 +33,7 @@ In this code all the settings are given and can be addapted (such as the detecti
 
 
 <details>
-<summary> communication_code.script </summary>
+<summary><i>communication_code.script</i></summary>
   
 This is a code written in urscript and runs on the universal robot which is used as a client. This code moves to the start location, it sends message and a ply ID to the PC. It then waits for coördinates and error code to be send back. If received it sends a verification back that this went succesfully. then it moves the robot to the location of the ply, when done it sends a message to the PC to activate the sucker system. Then it waits a while and moves the ply to the place where the composite is to be build.
 
@@ -44,7 +44,7 @@ This is a code written in urscript and runs on the universal robot which is used
 
 
 <details>
-<summary> Dxf_to_contour.py </summary>
+<summary><i>Dxf_to_contour.py</i></summary>
   
 This python script opens a dxf file that contains the 2D sketches of the ply's that are transported by the universal robot. This script converts the dxf file to png, and extracts all the contours and saves them individually. These contours can then be put into a database and be compared to the reallife ply's. This way defect ply's can be found.
 
@@ -55,7 +55,7 @@ This python script opens a dxf file that contains the 2D sketches of the ply's t
 
 
 <details>
-<summary> contours.py </summary>
+<summary><i>contours.py</i></summary>
   
 This python script accounts for detecting contours. The GUI sends a contour to the laptop which needs to be found in the camera image. This script contains the functions necessary for comparing contours which will allow for the detection of the right contour.
 
@@ -66,7 +66,7 @@ This python script accounts for detecting contours. The GUI sends a contour to t
 
 
 <details>
-<summary> machine_vision_functions.py </summary>
+<summary><i>machine_vision_functions.py</i></summary>
   
 ...
 
@@ -77,7 +77,7 @@ This python script accounts for detecting contours. The GUI sends a contour to t
 
 
 <details>
-<summary> run_machine_vision.py </summary>
+<summary><i>run_machine_vision.py </summary>
   
 ...
 
@@ -87,7 +87,7 @@ This python script accounts for detecting contours. The GUI sends a contour to t
 
 
 <details>
-<summary> calibrate.py </summary>
+<summary><i>calibrate.py</i></summary>
   
 This file is used for storing the calibration functions. These functions allow for the calibration of the camera to the universal robot. Required for its use are the images and robot poses captured during the calibration. The function returns a translation matrix which can be used for converting camera coordinates to their corresponding robot pose. 
 
@@ -96,7 +96,7 @@ This file is used for storing the calibration functions. These functions allow f
 </details>
 
 <details>
-<summary> PLC_communication.py </summary>
+<summary><i>PLC_communication.py</i></summary>
   
 This file is used for storing the function for communicating to the PLC.
 
