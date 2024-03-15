@@ -30,14 +30,22 @@ In this code all the settings are given and can be addapted (such as the detecti
 
 
 <details>
-<summary><i>communication_code.script</i></summary>
+<summary><i>start_moving_ply.script</i></summary>
   
-This is a code written in urscript and runs on the universal robot which is used as a client. This code moves to the start location, it sends message and a ply ID to the PC. It then waits for coördinates and error code to be send back. If received it sends a verification back that this went succesfully. then it moves the robot to the location of the ply, when done it sends a message to the PC to activate the sucker system. Then it waits a while and moves the ply to the place where the composite is to be build.
+This is a code written in urscript and runs on the universal robot which is used as a client. This code is activated when the ply's needs to be moved and a composite needs to be made. The current version of this code works together with the PC to find 1 single ply, it does not matter which ply, pick this ply up and place it on another location. This code is executed when on the GUI of the robot the button "start moving ply's" is pressed.
 
 > This code is not completed yet and will be updated until the end of the project
 ---
 </details>
 
+
+<details>
+<summary><i>calibration.script</i></summary>
+This code is written in urscript and runs on the UR. This code communicates with the PC and preforms the calibration automaticaly. All that needs to be done is that the tool end needs to be manually replaced with the calibration tool. This code is executed when on the GUI of the robot the button "start calibration" is pressed. After executing this code the robot will move to a few locations and will pause at every location for the camera to take a picture. The picture and the pose are then compared on the PC and the calibration is finished.
+
+> This code is not completed yet and will be updated until the end of the project
+---
+</details>
 
 
 <details>
