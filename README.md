@@ -41,12 +41,31 @@ This python script accounts for detecting contours. The GUI sends a contour to t
 > This code is not completed yet and will be updated until the end of the project
 ---
 </details>
+      <details><summary><i>machine_vision_functions.py</i></summary>
 
+...
+
+> This code is not completed yet and will be updated until the end of the project
+---
+</details>
+      <details><summary><i>calibrate.py</i></summary>
+  
+This file is used for storing the calibration functions. These functions allow for the calibration of the camera to the universal robot. Required for its use are the images and robot poses captured during the calibration. The function returns a translation matrix which can be used for converting camera coordinates to their corresponding robot pose. 
+
+> This code is not completed yet and will be updated until the end of the project
+---
+</details>
+      <details><summary><i>PLC_communication.py</i></summary>
+  
+This file is used for storing the function for communicating to the PLC.
+
+> This code is not completed yet and will be updated until the end of the project
+---
+</details>
 </details>
 
 
-<details>
-<summary><i>start_moving_ply.script</i></summary>
+<details><summary><i>start_moving_ply.script</i></summary>
   
 This is a code written in urscript and runs on the universal robot which is used as a client. This code is activated when the ply's needs to be moved and a composite needs to be made. The current version of this code works together with the PC to find 1 single ply, it does not matter which ply, pick this ply up and place it on another location. This code is executed when on the GUI of the robot the button "start moving ply's" is pressed.
 
@@ -55,53 +74,9 @@ This is a code written in urscript and runs on the universal robot which is used
 </details>
 
 
-<details>
-<summary><i>calibration.script</i></summary>
+<details><summary><i>calibration.script</i></summary>
   
 This code is written in urscript and runs on the UR. This code communicates with the PC and preforms the calibration automaticaly. All that needs to be done is that the tool end needs to be manually replaced with the calibration tool. This code is executed when on the GUI of the robot the button "start calibration" is pressed. After executing this code the robot will move to a few locations and will pause at every location for the camera to take a picture. The picture and the pose are then compared on the PC and the calibration is finished.
-
-> This code is not completed yet and will be updated until the end of the project
----
-</details>
-
-
-
-
-
-<details>
-<summary><i>machine_vision_functions.py</i></summary>
-  
-...
-
-> This code is not completed yet and will be updated until the end of the project
----
-</details>
-
-
-
-<details>
-<summary><i>run_machine_vision.py</i></summary>
-  
-...
-
-> This code is not completed yet and will be updated until the end of the project
----
-</details>
-
-
-<details>
-<summary><i>calibrate.py</i></summary>
-  
-This file is used for storing the calibration functions. These functions allow for the calibration of the camera to the universal robot. Required for its use are the images and robot poses captured during the calibration. The function returns a translation matrix which can be used for converting camera coordinates to their corresponding robot pose. 
-
-> This code is not completed yet and will be updated until the end of the project
----
-</details>
-
-<details>
-<summary><i>PLC_communication.py</i></summary>
-  
-This file is used for storing the function for communicating to the PLC.
 
 > This code is not completed yet and will be updated until the end of the project
 ---
