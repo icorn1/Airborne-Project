@@ -3,8 +3,8 @@ import snap7
 import numpy as np
 import os
 import telnetlib
-from ftplib import FTP
 import cv2
+from ftplib import FTP
 from time import sleep
 from contours import find_most_similar_contour
 from machine_vision_functions import get_ply_information
