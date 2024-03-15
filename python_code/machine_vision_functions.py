@@ -206,7 +206,7 @@ def get_ply_information(contour, T, show_plot=False):
     grid_center_y = np.mean(grid_points[:, 1]) + optimal_translation_vector[1]
     pose_x = grid_center_x * T[0, 0] + T[0, 1]
     pose_y = -(grid_center_y * T[1, 0] + T[1, 1])  # Negate the y-coordinate
-    print(pose_x, pose_y)
+    
     robot_pose = np.array([pose_x, pose_y]) / 1000
     Rx, Ry = calculate_angles(optimal_rotation_angle)
     if show_plot:
