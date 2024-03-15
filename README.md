@@ -26,7 +26,7 @@ This code is the main code and is simple to use: Download all the python codes o
 In this code all the settings are given and can be addapted (such as the detection threshhold for instance). An explanation for all the variables is given in the code itself. When the code is executed the PC opens a socket connection and waits till it is accepted by the UR. When the UR is started in the GUI you can select "start calibration" or "start moving ply's". When you select "start calibration", this will be send to the PC and the PC will make sure to run the right code for the calibration and will preform the calibration automaticaly (the only thing you will have to do is replace the tool end for the calibration tool). When you select "start moving ply's" the PC will be notified and will run the right script for this. Again the rest is all preformed automaticaly, unless there is a defect ply. When this happens, in the GUI, you can chose to skip this ply or to chose another ply to fill in in the composite.
 
 
-> This code is not completed yet and will be updated until the end of the project. The PC should also exchange communication with a PLC and Festo controller to control the vacuüm cups of the tool end.
+> This code is not completed yet and will be updated until the end of the project.
 ---
 </details>
 
