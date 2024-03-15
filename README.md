@@ -17,11 +17,14 @@ In this github, we aim to share the code for the project we (students from THUAS
 
 ## A Guide to the codes:
 
-<detail><summary>Explenation of the python codes</summary>
-  <detail><summary>a summary</summary>
-   tekst
- </detail>
-</detail>
+<details><summary>head 1</summary>
+      <details><summary>head 1.1</summary>
+        content 1.1
+    </details>
+    <details><summary>head 1.2</summary>
+        content 1.2
+    </details>
+</details>
     
 <details>
 <summary><i>main_communication_code.py</i></summary>
