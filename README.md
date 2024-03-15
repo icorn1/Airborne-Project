@@ -17,7 +17,7 @@ In this github, we aim to share the code for the project we (students from THUAS
 
 ## A Guide to the codes:
 
-<details><summary>Explenation of python code</summary>
+<details><summary><b>Explenation of python code</b></summary>
       <details><summary><i>main_communication_code.py</i></summary>
             
 This is the main code that is run in python on the PC. The PC is the host and the Universal Robot (UR) and PLC are the clients. This code is the main code and is simple to use: Download all the python codes onto the PC and the URScripts onto the robot and run the code on the PC. Than for the rest everything can be done from the GUI on the robot.
@@ -64,7 +64,7 @@ This file is used for storing the function for communicating to the PLC.
 </details>
 </details>
 
-<details><summary>Explenation of URScript code</summary>
+<details><summary><b>Explenation of URScript code</b></summary>
       <details><summary><i>start_moving_ply.script</i></summary>
   
 This is a code written in urscript and runs on the universal robot which is used as a client. This code is activated when the ply's needs to be moved and a composite needs to be made. The current version of this code works together with the PC to find 1 single ply, it does not matter which ply, pick this ply up and place it on another location. This code is executed when on the GUI of the robot the button "start moving ply's" is pressed.
