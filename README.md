@@ -18,7 +18,7 @@ In this github, we aim to share the code for the project we (students from THUAS
 ## A Guide to the codes:
 
 <detail><summary>Explenation of the python codes</summary>
- <detail><summary>a summary</summary>
+  <detail><summary>a summary</summary>
    tekst
  </detail>
 </detail>
