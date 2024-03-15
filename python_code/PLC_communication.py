@@ -16,7 +16,7 @@ def get_start_offset(valve, num_valves):
 
 
 def get_bit_offset(valve, num_valves):
-    if valve < 0 or valve > num_valves:
+    if valve < 0 or valve >= num_valves:
         print("Incorrect valve provided.")
         return None
     
