@@ -22,18 +22,6 @@ def close_socket():
     server_socket.close()
 
 
-def camera_data():
-    # the camera gathers information. in this case some randon coordinates
-    x = -0.4
-    y = -0.5
-    rx = 3.14
-    ry = 0
-    error_code = 0  # Error_code 1 tells if the ply with the ply_ID given by the UR could be found or if a ply diviates more than 80% or something.
-    # Error_code 0 tells that there is no problem.
-    cup_array = [0] * 24
-    return x, y, rx, ry, error_code, cup_array
-
-
 def get_cognex_image():
     # cognex's config
     ip = "192.168.0.10"
@@ -84,7 +72,7 @@ def perform_calibration():
         sleep(2)
         # make picture and safe this picture
         image = get_cognex_image()
-        if not os.path.exists(output_folder):
+        if not os.path.exists('calibration_images'):
             os.mkdir('calibration_images')
         cv2.imwrite(f'calibration_images/{i:02b}.png', image)
 
@@ -100,14 +88,20 @@ def send_ply_information():
     mtx = mtx_data['arr_0'].astype(np.float64)
     dst_data = np.load('DistortionMatrix.npz')
     dst = dst_data['arr_0'].astype(np.float64)
+    T_data = np.load('Translation.npz')
+    T = T_data['arr_0']
 
     image = get_cognex_image()
     image = undistort_image(image, dst, mtx)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _, mask = cv2.threshold(gray, 130, 255, 0)
+    _, mask = cv2.threshold(gray, 254, 255, 0)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    min_index = find_most_similar_contour('contours', '3_mesh_contour.txt', contours, show_plot=True)
+    contours = [contour for contour in contours if cv2.contourArea(contour) > 200]
+    cv2.drawContours(image, contours, -1, (0, 255, 255), 3)
+    # cv2.imshow('img', image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    min_index = find_most_similar_contour('contours', '1_mesh_contour.txt', contours, show_plot=False)
     x, y, rx, ry, error_code, cup_array = get_ply_information(contours[min_index], T, show_plot=True)
 
     # x, y, rx, ry, error_code, cup_array = camera_data()
@@ -126,47 +120,49 @@ def send_ply_information():
         print("UR:", data, "vacuum cups \n")
         print("PC: activating vacuüm cups:", cup_array, "\n \n")
 
-        write_values(indices, 1, 24)
+        write_values(plc, cup_array, 1, 24)
         
         data = client_socket.recv(1024).decode()
         print("UR:", data, "vacuum cups \n")
         print("PC: Deactivate vacuüm cups:", cup_array, "\n \n")
 
-        write_values(indices, 0, 24)
+        write_values(plc, cup_array, 0, 24)
 
     if error_code == 1:
         print("PC: error_code: 1 \n \n")
 
 
+
 """
 this is part of the initialisation when starting up the robot. This needs to be run only once.
 """
-host = '192.168.0.100'  # IP address of the UR controller (PC or laptop)
-port = 50003  # The port used by the UR server
-server_socket = socket.socket(socket.AF_INET,
-                              socket.SOCK_STREAM)  # Create a socket object and bind the socket to the host and port
-server_socket.bind((host, port))
-
-"""
-This while loop does the following:
-    wait for a signal,
-    accept signal,
-    ... update this code ...
-"""
-
-while True:
-    server_socket.listen(5)
-    print("PC: Waiting for client connection...")
-    client_socket, address = server_socket.accept()
-    print("PC: Connected \n")
-    task = client_socket.recv(1024).decode()
-
-    if task == "calibration":
-        print("UR: start calibration")
-        perform_calibration()
-        calibrate('calibration_images', 'robot_poses/custom_poses.txt', 'calibration_matrices/IntrinsicMatrix.npz',
-                  'calibration_matrices/DistortionMatrix.npz', 30, (5, 5), distortion=True)
-
-    elif task == "moving":
-        print("UR: start moving ply's")
-        send_ply_information()
+if __name__ == '__main__':
+    host = '192.168.0.100'  # IP address of the UR controller (PC or laptop)
+    port = 50001  # The port used by the UR server
+    server_socket = socket.socket(socket.AF_INET,
+                                  socket.SOCK_STREAM)  # Create a socket object and bind the socket to the host and port
+    server_socket.bind((host, port))
+    
+    """
+    This while loop does the following:
+        wait for a signal,
+        accept signal,
+        ... update this code ...
+    """
+    
+    while True:
+        server_socket.listen(5)
+        print("PC: Waiting for client connection...")
+        client_socket, address = server_socket.accept()
+        print("PC: Connected \n")
+        task = client_socket.recv(1024).decode()
+    
+        if task == "calibration":
+            print("UR: start calibration")
+            perform_calibration()
+            calibrate('calibration_images', 'robot_poses/custom_poses.txt', 'calibration_matrices/IntrinsicMatrix.npz',
+                      'calibration_matrices/DistortionMatrix.npz', 30, (5, 5), distortion=True)
+    
+        elif task == "moving":
+            print("UR: start moving ply's")
+            send_ply_information()
