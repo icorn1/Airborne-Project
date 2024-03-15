@@ -20,7 +20,11 @@ In this github, we aim to share the code for the project we (students from THUAS
 <details>
 <summary> communication_code.py </summary>
   
-This is a code written in python and runs on the PC used as host. This code waits for a connection from the UR. When it gets a connection it reads the ply ID send to it from the UR. Then it runs the code for the camera which analyses the ply's placed on the table and returns the real coördinates of where the ply is to be found and an error code if the ply is defect or can not be found. The PC sends this data to the UR and wait for a verification back. When received it waits for a message to activate the sucker end tool.
+This is the main code that is run in python on the PC. The PC is the host and the Universal Robot (UR) and PLC are the clients. 
+This code is the main code and is simple to use: Download all the python codes onto the PC and the URScripts onto the robot and run the code on the PC. Than for the rest everything can be done from the GUI on the robot.
+
+In this code all the settings are given and can be addapted (such as the detection threshhold for instance). An explanation for all the variables is given in the code itself. When the code is executed the PC opens a socket connection and waits till it is accepted by the UR. When the UR is started in the GUI you can select "start calibration" or "start moving ply's". When you select "start calibration", this will be send to the PC and the PC will make sure to run the right code for the calibration and will preform the calibration automaticaly (the only thing you will have to do is replace the tool end for the calibration tool). When you select "start moving ply's" the PC will be notified and will run the right script for this. Again the rest is all preformed automaticaly, unless there is a defect ply. When this happens, in the GUI, you can chose to skip this ply or to chose another ply to fill in in the composite.
+
 
 > This code is not completed yet and will be updated until the end of the project. The PC should also exchange communication with a PLC and Festo controller to control the vacuüm cups of the tool end.
 ---
