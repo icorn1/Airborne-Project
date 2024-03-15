@@ -77,7 +77,7 @@ This python script accounts for detecting contours. The GUI sends a contour to t
 
 
 <details>
-<summary><i>run_machine_vision.py </summary>
+<summary><i>run_machine_vision.py</i></summary>
   
 ...
 
