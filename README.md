@@ -34,11 +34,14 @@ This python script opens a dxf file that contains the 2D sketches of the ply's t
 > This code is not completed yet and will be updated until the end of the project
 ---
 </details>
-      <details><summary> hello</summary>
+      <details><summary><i>contours.py</i></summary>
+  
+This python script accounts for detecting contours. The GUI sends a contour to the laptop which needs to be found in the camera image. This script contains the functions necessary for comparing contours which will allow for the detection of the right contour.
 
-      
-
+> This code is not completed yet and will be updated until the end of the project
+---
 </details>
+
 </details>
 
 
@@ -62,24 +65,6 @@ This code is written in urscript and runs on the UR. This code communicates with
 </details>
 
 
-<details>
-<summary><i>Dxf_to_contour.py</i></summary>
-  
-This python script opens a dxf file that contains the 2D sketches of the ply's that are transported by the universal robot. This script converts the dxf file to png, and extracts all the contours and saves them individually. These contours can then be put into a database and be compared to the reallife ply's. This way defect ply's can be found.
-
-> This code is not completed yet and will be updated until the end of the project
----
-</details>
-
-
-<details>
-<summary><i>contours.py</i></summary>
-  
-This python script accounts for detecting contours. The GUI sends a contour to the laptop which needs to be found in the camera image. This script contains the functions necessary for comparing contours which will allow for the detection of the right contour.
-
-> This code is not completed yet and will be updated until the end of the project
----
-</details>
 
 
 
