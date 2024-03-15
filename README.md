@@ -59,7 +59,6 @@ This python script opens a dxf file that contains the 2D sketches of the ply's t
 </details>
 
 
-
 <details>
 <summary><i>contours.py</i></summary>
   
