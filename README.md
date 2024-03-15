@@ -6,7 +6,7 @@ In this github, we aim to share the code for the project we (students from THUAS
 ## Contact Information
 <details>
 <summary> The students who worked on this project are: </summary>
-
+<br />
 | Name:            | email:                         |
 |------------------|--------------------------------|
 | Jort Leroij      | jortjorisleroy@gmail.com       |
