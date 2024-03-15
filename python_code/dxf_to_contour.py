@@ -1,10 +1,13 @@
-# this python script opens a dxf file and tries to get the contours from it so that these contours can be matched with the used ply's
-
 import matplotlib.pyplot as plt
 import ezdxf
 import cv2
 import os
 import numpy as np
+
+# Variables
+FIGURE_SIZE = (30, 30)  # The size of the created figure in matplotlib
+MASKING_THRESHOLD = 254  # The masking threshold value
+INVERT_MASKING = 1  # 1 or 0 for inverting or not inverting the mask
 
 
 def save_contour(filename, cont):
@@ -29,6 +32,8 @@ def dfx2png(file, output_file):
     lwpolylines = [e for e in msp if e.dxftype() == "LWPOLYLINE"]
     splines = [e for e in msp if e.dxftype() == "SPLINE"]
     circles = [e for e in msp if e.dxftype() == "CIRCLE"]
+    fig = plt.figure(figsize=FIGURE_SIZE)
+    ax = fig.add_subplot(111)
 
     if circles:
         for circle in circles:
@@ -39,30 +44,31 @@ def dfx2png(file, output_file):
     if splines:
         for spline in splines:
             x_vals, y_vals, _ = zip(*spline.control_points)
-            plt.plot(x_vals, y_vals)
+            ax.plot(x_vals, y_vals)
 
     if lwpolylines:
         for lwpolyline in lwpolylines:
             x_vals, y_vals, _, _, _ = zip(*lwpolyline)
             x_vals += (x_vals[0],)
             y_vals += (y_vals[0],)
-            plt.plot(x_vals, y_vals)
+            ax.plot(x_vals, y_vals)
 
     if lines:
         for line in lines:
             start_point = (line.dxf.start.x, line.dxf.start.y)
             end_point = (line.dxf.end.x, line.dxf.end.y)
-            plt.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]])
+            ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]])
 
-    plt.axis('equal')
+    ax.set_aspect('equal', 'box')
     plt.axis('off')
-    plt.savefig(f"{output_file}")
+    plt.savefig(f"{output_file}", bbox_inches='tight')
 
 
 def png2contour(file, output_folder, debug=False):
     """
     Extract contours from PNG images and save them to text files.
 
+    :param scale_factor: Scales the contour back down
     :param file: The file containing the ply contours
     :param output_folder: The folder where the generated contour text files will be saved.
     :param debug: If True, display images with drawn contours for debugging purposes (default is False).
@@ -70,14 +76,14 @@ def png2contour(file, output_folder, debug=False):
     # Get the image to the right state to find the contour
     img = cv2.imread(file)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, mask = cv2.threshold(gray, 254, 255, 1)
+    _, mask = cv2.threshold(gray, MASKING_THRESHOLD, 255, INVERT_MASKING)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # There should only be a single contour so this is fine
     for i, contour in enumerate(contours):
         if debug:
             cv2.drawContours(img, [contour], -1, (0, 255, 0), 3)
-            cv2.imshow('img', img)
+            pic = cv2.resize(img, (800, 600))
+            cv2.imshow('img', pic)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
 
@@ -87,5 +93,6 @@ def png2contour(file, output_folder, debug=False):
         save_contour(f'{output_folder}/{i}_mesh_contour.txt', contour)
 
 
-dfx2png('meshes/test_2Dfile.dxf', 'pngs/test2D.png')
-png2contour('pngs/test2D.png', 'contours', debug=True)
+if __name__ == '__main__':
+    dfx2png('meshes/pastics.dxf', 'pngs/palstics.png')
+    png2contour('pngs/palstics.png', 'contours', debug=True)
