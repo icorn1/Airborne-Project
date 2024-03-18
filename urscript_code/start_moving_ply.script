@@ -9,10 +9,10 @@
 # After this the robot moves to where the composite should be build.
 
 def start_moving_ply():
- if socket_open("192.168.0.100", port) == True:
+ if socket_open(IP_HOST, PORT) == True:
   socket_send_string("moving")
 
-  socket_send_string(ply_ID)
+  socket_send_string(PLY_ID)
   data = socket_read_ascii_float(5, "socket_0")
 
   if data[5] == 0:
@@ -41,22 +41,15 @@ def start_moving_ply():
  end
 end
 
-# Discription to start_location()
+
 # move the robot to the start location.
-
-def start_location():
- movej(p[-0.400, 0.000, 0.100, 3.14, 0, 0])
-end
-
-# Get variables from GUI
-ply_ID = 3
-port = 50003
+movej(START_LOC)
 
 # basic variables
 z = 0.100
 Rz = 0
 Rx = 3.14
 
-start_location()
+movej(START_LOC)
 start_moving_ply()
 halt
