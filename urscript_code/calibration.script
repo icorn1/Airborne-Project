@@ -35,6 +35,8 @@ def calibration():
 end
 
 port = 50003
-start_location()
-calibration()
-halt
+
+# make sure the robot first moves to the start location.
+# the positions need to be addapted for the calibration tool used.
+#calibration()
+#halt
