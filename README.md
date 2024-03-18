@@ -82,4 +82,13 @@ This code is written in urscript and runs on the UR. This code communicates with
 > This code is not completed yet and will be updated until the end of the project
 ---
 </details>
+      <details><summary><i>Initialise_variables.script</i></summary>
+  
+This code is written in urscript and runs on the UR. This code initialises the variables such as starting position, safe height for the robot, the host ID, the port and the ply ID.
+
+> This code is not completed yet and will be updated until the end of the project
+---
+</details>
+
+
 </details>
