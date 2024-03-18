@@ -3,6 +3,7 @@ def Initialise_communication():
  global IP_HOST = "192.168.0.100"
  global PORT = 50001
  global PLY_ID = 3
+ global Z_HEIGHT = 0.300  # in meters
  movej(START_LOC)
 end
 
