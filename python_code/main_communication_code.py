@@ -31,8 +31,7 @@ def get_cognex_image():
     # cognex's config
     ip = "192.168.0.10"
     user = 'admin'
-    #    password = ''
-
+    
     # telnet login
     tn = telnetlib.Telnet(ip, 10000)
     telnet_user = user + '\r\n'
@@ -45,9 +44,6 @@ def get_cognex_image():
     # ftp login
     ftp = FTP(ip)
     ftp.login(user)
-
-    # show all file in cognex
-    ftp.dir()
 
     # download file from cognex
     filename = 'image.bmp'
