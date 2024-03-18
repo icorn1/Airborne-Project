@@ -18,10 +18,10 @@ def start_moving_ply():
   if data[5] == 0:
    textmsg(str_cat("error_code: ", data[5]))
    
-   ply_location  = p[data[1], data[2], z, data[3], data[4], Rz]
-   move_down     = p[0,0,0.1,0,0,0]
-   move_up       = p[0,0,-0.1,0,0,0]
-   composite_loc = p[-0.4,0.5,0.2,3.14,0,0]
+   ply_location  = p[data[1], data[2], Z_HEIGHT, data[3], data[4], 0]
+   move_down     = p[0,0,0.180,0,0,0]
+   move_up       = p[0,0,-0.180,0,0,0]
+   composite_loc = p[-0.4,0.5,Z_HEIGHT,3.14,0,0]
    
    textmsg("position: ", ply_location)
    movej(ply_location)
@@ -41,14 +41,8 @@ def start_moving_ply():
  end
 end
 
-
 # move the robot to the start location.
 movej(START_LOC)
-
-# basic variables
-z = 0.100
-Rz = 0
-Rx = 3.14
 
 movej(START_LOC)
 start_moving_ply()
