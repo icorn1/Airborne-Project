@@ -96,3 +96,9 @@ This code is written in urscript and runs on the UR. This code turns off all of 
 </details>
 
 </details>
+
+<details><summary><b>Explanation of URCaps code</b></summary>
+      <br />
+	URCaps code is based on Java, with HTML as a frontend in this case. This way we can create custom installation and program modules for UR cobots that do exactly what we want, and they can also act as a GUI.
+
+</details>
