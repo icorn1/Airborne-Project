@@ -9,16 +9,16 @@
 # picture. The robot waits for a while to give time to the PC to make the picture
 
 def calibration():
- movej(p[-0.400, 0.000, 0.300, 0, 0, 0])
+# movel(p[-0.400, 0.000, 0.300, 0, 0, 0])
 
  while socket_open(IP_HOST, PORT) == True:
   socket_send_string("calibration")
   error = socket_read_ascii_float(1, "socket_0")
 
   if error[1] == 1:
-   movej(p[-0.250, -0.570, 0.300, 0, 0, 0])
-   movej(p[-0.250, -0.570, 0.300, 0.93, 1.16, 0])
-   movej(p[-0.250, -0.570, 0.300, 2.0, 2.5, 0])
+#   movel(p[-0.250, -0.570, 0.300, 0, 0, 0])
+#   movel(p[-0.250, -0.570, 0.300, 0.93, 1.16, 0])
+#   movel(p[-0.250, -0.570, 0.300, 2.0, 2.5, 0])
    socket_close("socket_0")
    break
   end
@@ -26,9 +26,9 @@ def calibration():
   if error[1] == 0:
    data = socket_read_ascii_float(6, "socket_0")
    calibration_location = p[data[1], data[2], data[3], data[4], data[5], data[6]]
-   movej(calibration_location)
+   movel(calibration_location)
    socket_send_string("ready for picture")
-   sleep(2)
+   sleep(6)
    socket_close("socket_0")
   end
  end
@@ -36,4 +36,4 @@ end
 
 # make sure the robot first moves to the start location.
 # the positions need to be addapted for the calibration tool used.
-#calibration()
+calibration()
