@@ -56,11 +56,11 @@ def get_cognex_image():
     return image
 
 
-def perform_calibration2test():
-    global i
+def perform_calibration():
     robot_poses = np.loadtxt('robot_pose2.txt')
-    if i < len(robot_poses) - 1:
-        i += 1
+    
+    for i, pose in enumerate(robot_poses):
+        
         client_socket.send(format_nums(([0])).encode())
 
         robot_pose = robot_poses[i]
@@ -76,41 +76,14 @@ def perform_calibration2test():
         if not os.path.exists('calibration_images'):
             os.mkdir('calibration_images')
         cv2.imwrite(f'calibration_images/{i:02b}.png', image)
+        
 
-    else:
-        client_socket.send(format_nums(([1])).encode())
-        calibrate('calibration_images', 'robot_pose2.txt', 'IntrinsicMatrix.npz',
-                  'DistortionMatrix.npz', (4, 4), (5, 5), distortion=True)
-
-
-def perform_calibration():
-    robot_poses = np.loadtxt('robot_pose2.txt')
-    for i, pose in enumerate(robot_poses):
-        print("PC: sending to robot")
-        client_socket.send(format_nums(([0])).encode())
-
-        x, y, z, rx, ry, rz = pose[:]
-        client_socket.send(format_nums((x, y, z, rx, ry, rz)).encode())
-        print("PC: reading from robot")
-        data = client_socket.recv(1024).decode()
-        print("UR: ", data)
-
-        sleep(2)
-        # make picture and save this picture
-        image = get_cognex_image()
-        if not os.path.exists('calibration_images'):
-            os.mkdir('calibration_images')
-        cv2.imwrite(f'calibration_images/{i:02b}.png', image)
-        junk = client_socket.recv(1024).decode()
-    print("PC: ending")
-    
     client_socket.send(format_nums(([1])).encode())
-
+    calibrate('calibration_images', 'robot_pose2.txt', 'IntrinsicMatrix.npz',
+              'DistortionMatrix.npz', (4, 4), (5, 5), distortion=True)
+    
 
 def send_ply_information():
-    ply_number = client_socket.recv(1024).decode()
-    print("UR: ply_ID is ", ply_number, "\n")
-
     mtx_data = np.load('IntrinsicMatrix.npz')
     mtx = mtx_data['arr_0'].astype(np.float64)
     dst_data = np.load('DistortionMatrix.npz')
@@ -156,6 +129,71 @@ def send_ply_information():
 
     if error_code == 1:
         print("PC: error_code: 1 \n \n")
+        
+        
+def send_ply_information2test():
+    for i in Laminate_ID:
+        mtx_data = np.load('IntrinsicMatrix.npz')
+        mtx = mtx_data['arr_0'].astype(np.float64)
+        dst_data = np.load('DistortionMatrix.npz')
+        dst = dst_data['arr_0'].astype(np.float64)
+        T_data = np.load('Translation.npz')
+        T = T_data['arr_0']
+        image = get_cognex_image()
+        image = undistort_image(image, dst, mtx)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        _, mask = cv2.threshold(gray, MASKING_THRESHOLD, 255, INVERT_MASK)
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = [contour for contour in contours if cv2.contourArea(contour) > MINIMUM_CONTOUR_AREA]
+        cv2.drawContours(image, contours, -1, (0, 255, 255), 3)
+        # cv2.imshow('img', image)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        min_index = find_most_similar_contour('contours', '1_mesh_contour.txt', contours, show_plot=False)
+        x, y, rx, ry, error_code, cup_array = get_ply_information(contours[min_index], T, show_plot=False)
+
+        # some random location for the composite to be.
+        xc = -0.4
+        yc = 0.5
+        rxc = 3.14
+        ryc = 0
+        
+        # Error codes and their meaning:
+        # 0 = there is no problem, the ply is found.
+        # 1 = there is a problem, the ply is not found.
+        # 2 = the laminate is finished and the robot needs to know.
+        
+        print("PC: Sending error_code")
+        client_socket.send(format_nums(([error_code])).encode())
+    
+        if error_code == 0:
+            print("PC: sending: x:", x, "| y:", y, "| Rz:", rx, "| Ry:", ry,
+                  "| xc:", xc, "| yc:", yc, "| Rxc:", rxc, "| Ryc:", ryc)
+            client_socket.send(format_nums((x, y, rx, ry, xc, yc, rxc, ryc)).encode())
+
+            plc = snap7.client.Client()  # connecting to the PLC while the robot moves to ply
+            plc.connect('192.168.0.1', 0, 1)  # IP address, rack, slot (from HW settings)
+            print("PC: connecting to the PLC")
+    
+            activation_code = client_socket.recv(1024).decode()
+            print("UR:", activation_code, "vacuum cups \n")
+            print("PC: activating vacuüm cups:", cup_array, "\n \n")
+    
+            write_values(plc, cup_array, 1)
+    
+            activation_code = client_socket.recv(1024).decode()
+            print("UR:", activation_code, "vacuum cups \n")
+            print("PC: Deactivate vacuüm cups:", cup_array, "\n \n")
+            write_values(plc, cup_array, 0)
+            
+            Error = client_socket.recv(1024).decode()
+            if Error == 3:
+                print("UR: pickup succesful")
+            if Error == 4:
+                print("UR: Failed pickup")
+
+        if error_code == 1:
+            print("PC: error_code: 1 \n \n")
 
 
 """
@@ -174,7 +212,7 @@ if __name__ == '__main__':
         accept signal,
         ... update this code ...
     """
-    i = -1
+
     
     while True:
         server_socket.listen(5)
@@ -185,9 +223,13 @@ if __name__ == '__main__':
 
         if task == "calibration":
             print("UR: start calibration")
-            perform_calibration2test()
+            perform_calibration()
 
 
         elif task == "moving":
             print("UR: start moving ply's")
-            send_ply_information()
+            Laminate_ID = client_socket.recv(1024).decode()
+            
+            # used when running send_ply_information2test()
+            print("UR: Laminate ID is ", Laminate_ID, "\n")
+            send_ply_information2test()

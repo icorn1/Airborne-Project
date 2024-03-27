@@ -99,6 +99,12 @@ This code is written in urscript and runs on the UR. This code turns off all of 
 
 <details><summary><b>Explanation of URCaps code</b></summary>
       <br />
-	URCaps code is based on Java, with HTML as a frontend in this case. This way we can create custom installation and program modules for UR cobots that do exactly what we want, and they can also act as a GUI.
+	URCaps code is based on Java, with Swing for the application in this case. This way we can create custom installation and program modules for UR cobots that do exactly what we want, and they can also act as a GUI.
+ What our URCap does exactly (demonstration) is provide a GUI and a simple integration for a Cobot to a laptop, to perform the logic of the robot. For it to be automated, the first step is to press the big green button "START". 
 
+Contents of the GUI:
+- Company (Airborne) logo + student credits.
+- Big green button to start the program.
+- Settings boxes to select wheter user wants to do calibration or run a certain laminate.
+- Corresponding laminate image.
 </details>
