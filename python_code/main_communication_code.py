@@ -14,6 +14,7 @@ import cv2
 MASKING_THRESHOLD = 254
 INVERT_MASK = 0
 MINIMUM_CONTOUR_AREA = 200
+CTI_FILE_PATH = "C:/Program Files/Balluff/ImpactAcquire/bin/x64/mvGenTLProducer.cti"
 
 
 def format_nums(integers):
