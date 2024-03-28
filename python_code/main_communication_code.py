@@ -2,10 +2,9 @@ from machine_vision_functions import get_ply_information
 from calibrate import calibrate, undistort_image
 from contours import find_most_similar_contour
 from PLC_communication import write_values
-from ftplib import FTP
+from harvesters.core import Harvester
 from time import sleep
 import numpy as np
-import telnetlib
 import socket
 import snap7
 import os
@@ -27,33 +26,19 @@ def close_socket():
     server_socket.close()
 
 
-def get_cognex_image():
-    # cognex's config
-    ip = "192.168.0.10"
-    user = 'admin'
-    
-    # telnet login
-    tn = telnetlib.Telnet(ip, 10000)
-    telnet_user = user + '\r\n'
-    tn.write(telnet_user.encode('ascii'))
-    tn.write("\r\n".encode('ascii'))
-
-    # capture
-    tn.write(b"SE8\r\n")
-
-    # ftp login
-    ftp = FTP(ip)
-    ftp.login(user)
-
-    # download file from cognex
-    filename = 'image.bmp'
-    lf = open(filename, "wb")
-    ftp.retrbinary("RETR " + filename, lf.write)
-    lf.close()
-
-    image = cv2.imread('image.bmp')
-
-    return image
+def get_genie_image():
+    with Harvester() as h:
+        h.add_file(CTI_FILE_PATH)
+        h.update()
+        with h.create(0) as ia:
+            ia.start()
+            with ia.fetch() as buffer:
+                component = buffer.payload.components[0]
+                width = component.width
+                height = component.height
+                bayer = component.data.reshape((height, width))
+                img = cv2.cvtColor(bayer, cv2.COLOR_BayerRG2BGR)
+    return img[..., ::-1]
 
 
 def perform_calibration():
@@ -72,7 +57,7 @@ def perform_calibration():
 
         sleep(2)
         # make picture and safe this picture
-        image = get_cognex_image()
+        image = get_genie_image()
         if not os.path.exists('calibration_images'):
             os.mkdir('calibration_images')
         cv2.imwrite(f'calibration_images/{i:02b}.png', image)
@@ -92,7 +77,7 @@ def send_ply_information():
     T_data = np.load('Translation.npz')
     T = T_data['arr_0']
 
-    image = get_cognex_image()
+    image = get_genie_image()
     image = undistort_image(image, dst, mtx)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, mask = cv2.threshold(gray, MASKING_THRESHOLD, 255, INVERT_MASK)
