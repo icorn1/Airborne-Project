@@ -81,13 +81,6 @@ public class TestInstallationNodeView implements SwingInstallationNodeView<TestI
         panel.add(topLogoContainer, BorderLayout.NORTH);
 
         panel.add(createSpacer(400)); // Add spacing (doesnt work)
-        
-        // // Big green button "Start" with instructions
-        // JPanel buttonContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        // buttonContainer.add(createSenderTestButton(contribution));
-
-        // panel.add(buttonContainer, BorderLayout.CENTER);
-
 
         // Settings panel, below the button, bottom left
         JPanel settingsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT)); // Use FlowLayout to left-align components
@@ -101,7 +94,7 @@ public class TestInstallationNodeView implements SwingInstallationNodeView<TestI
 
         panel.add(settingsPanel, BorderLayout.SOUTH);
 
-        // Laminate image panel
+        // Laminate image panel + start button (same panel)
         addLaminateImagePanel(panel, contribution);
     }
 
@@ -109,10 +102,10 @@ public class TestInstallationNodeView implements SwingInstallationNodeView<TestI
         JPanel thuasLogoPanel = new JPanel(); // No layout manager specified for automatic sizing
         JLabel thuasLogoLabel = new JLabel();
         ImageIcon thuasLogoIcon = new ImageIcon(getClass().getResource("/com/arbrn/urcap/demonstration/thuaslogo.png"));
-        int width = 250; // Width of the panel
+        int width = 250;
         int height = (int) ((double) thuasLogoIcon.getIconHeight() / thuasLogoIcon.getIconWidth() * width); // Calculate height to maintain aspect ratio
         thuasLogoLabel.setIcon(new ImageIcon(thuasLogoIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)));
-        thuasLogoPanel.add(thuasLogoLabel); // Add logo label to the panel
+        thuasLogoPanel.add(thuasLogoLabel); 
         return thuasLogoPanel;
     }
 
@@ -120,14 +113,15 @@ public class TestInstallationNodeView implements SwingInstallationNodeView<TestI
         JPanel logoPanel = new JPanel();
         JLabel logoLabel = new JLabel();
         ImageIcon logoIcon = new ImageIcon(getClass().getResource("/com/arbrn/urcap/demonstration/logo.jpg"));
-        int width = 250; // Width of the panel
+        int width = 250; 
         int height = (int) ((double) logoIcon.getIconHeight() / logoIcon.getIconWidth() * width); // Calculate height to maintain aspect ratio
         logoLabel.setIcon(new ImageIcon(logoIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)));
-        logoPanel.add(logoLabel); // Add logo label to the panel
+        logoPanel.add(logoLabel); 
         return logoPanel;
     }
 
     private Box createSenderTestButton(final TestInstallationNodeContribution contribution) {
+        // Creates the big green button and makes it functional
         Box box = Box.createVerticalBox();
 
         JLabel labelText = new JLabel("Press the following button to start the program once you have the desired configuration.");
@@ -139,12 +133,13 @@ public class TestInstallationNodeView implements SwingInstallationNodeView<TestI
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Here we send to the contribution the options for the script
                 contribution.sendScriptTest(ACTION_TYPE.getId(), SELECTED_LAMINATE.getId());
             }
         });
         button.setBackground(new Color(24, 196, 12));
         button.setForeground(Color.WHITE);
-        Dimension buttonSize = new Dimension(250, 70); // Increase button size
+        Dimension buttonSize = new Dimension(250, 70); 
         button.setMaximumSize(buttonSize);
         button.setMinimumSize(buttonSize);
         button.setPreferredSize(buttonSize);
@@ -157,6 +152,7 @@ public class TestInstallationNodeView implements SwingInstallationNodeView<TestI
     }
 
     private JComboBox<Option> createActionToPerform() {
+        // Creates the preselected text boxes for the Action to perform
         final JComboBox<Option> jcb = new JComboBox<Option>(new DefaultComboBoxModel<Option>(Option.values()));
         jcb.setSelectedIndex(0);
         jcb.setPreferredSize(new Dimension(150, 30));
@@ -179,12 +175,12 @@ public class TestInstallationNodeView implements SwingInstallationNodeView<TestI
         // In this function we "update" the laminate image (we just remove it previously and add it now)
         ImageIcon logoIcon = new ImageIcon(getClass().getResource(imagePath));
         if (logoIcon != null) {
-            int width = 300; // Width of the panel
+            int width = 300; 
             int height = (int) ((double) logoIcon.getIconHeight() / logoIcon.getIconWidth() * width); // Calculate height to maintain aspect ratio
             Image scaledImage = logoIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
             JLabel logoLabel = new JLabel(new ImageIcon(scaledImage));
             JPanel logoPanel = new JPanel(new BorderLayout());
-            logoPanel.add(logoLabel, BorderLayout.SOUTH); // Add logo label to the panel
+            logoPanel.add(logoLabel, BorderLayout.SOUTH); 
 
             return logoPanel;
         } else {

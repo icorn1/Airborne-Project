@@ -34,8 +34,7 @@ public class TestInstallationNodeContribution implements InstallationNodeContrib
 	}
 	
 	/**
-	 * This command is invoked by clicking the SEND button in the View 
-	 * Sends a popup command to URControl
+	 * This command is invoked by clicking the START button in the View 
 	 */
 
 	public void sendScriptTest(String action, String laminateName) {
@@ -43,7 +42,7 @@ public class TestInstallationNodeContribution implements InstallationNodeContrib
 		ScriptCommand sendTestCommand = new ScriptCommand();
 		
 		try {
-			// Read the contents of the file "full_code.script" from the resources
+			// Read the contents of the file "main.script" from the resources
 			InputStreamReader inputStreamReader = new InputStreamReader(Objects.requireNonNull(this.getClass().getResourceAsStream("/com/arbrn/urcap/demonstration/main.script")));
 			BufferedReader reader = new BufferedReader(inputStreamReader);
 			String line;
@@ -68,10 +67,8 @@ public class TestInstallationNodeContribution implements InstallationNodeContrib
 			
 		} catch (NullPointerException e) {
 			e.printStackTrace();
-			// Handle resource not found exception here
 		} catch (IOException e) {
 			e.printStackTrace();
-			// Handle file reading or writing errors here
 		}
 		
 		// Use the ScriptSender to send the command for immediate execution

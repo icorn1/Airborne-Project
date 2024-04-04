@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1712225024526
+Bnd-LastModified: 1712226452719
 Build-Jdk: 11.0.22
 Built-By: root
 Bundle-Activator: com.arbrn.urcap.demonstration.impl.Activator
@@ -15,7 +15,7 @@ Bundle-Name: Demonstration
 Bundle-SymbolicName: com.arbrn.urcap.demonstration
 Bundle-Vendor: The Hague University of Applied Sciences, Airborne Compos
  ites Automation, icorn1
-Bundle-Version: 1.0.0
+Bundle-Version: 1.1.0
 Created-By: Apache Maven Bundle Plugin
 Export-Package: com.arbrn.urcap.demonstration.communicator;version="1.0.
  0.SNAPSHOT"
