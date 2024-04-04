@@ -2,12 +2,12 @@ import cv2
 import numpy as np
 
 # Variables
-VACUUM_CUP_RADIUS = 25  # mm
-VACUUM_CUP_SPACING = 80  # mm
+VACUUM_CUP_RADIUS = 15  # mm
+VACUUM_CUP_SPACING = 65  # mm
 VACUUM_CUP_GRID = (4, 6)  # (y, x)
-IMAGE_SIZE = (600, 800)  # Of the camera post undistortion
+IMAGE_SIZE = (2015, 2549)  # Of the camera post undistortion
 THETA_RANGE = (-91, 91)  # Optimization range
-THETA_INTERVAL = 5  # Optimization interval
+THETA_INTERVAL = 1  # Optimization interval
 XY_RANGE = (-51, 51)  # Optimization range
 XY_INTERVAL = 5  # Optimization interval
 MAX_POINTS_INSIDE_CONTOUR = 23  # Breaks if higher than this number
@@ -35,10 +35,10 @@ def generate_grid(contour, T):
     grid_points = []
     index = 1  # Starting index
 
-    for j in range(0, grid_cols, 1):
+    for j in range(grid_cols, 0, -1):
         for i in range(0, grid_rows, 1):
-            x = j * x_spacing
-            y = i * y_spacing
+            x = i * x_spacing
+            y = j * y_spacing
             grid_points.append((x, y, index))
             index += 1
 
@@ -136,17 +136,16 @@ def optimize_grid_angle(contour, T):
     max_points_inside_contour = 0
     optimal_grid_points_inside_contour = []
     optimal_indices = []
+    surrounding_indices = []
+    surrounding_grid_points = []
 
     # Generate theta values from 0 to 90 and from -85 to -90
     theta_min, theta_max = THETA_RANGE
-    theta_values = np.concatenate((np.arange(0, theta_max, THETA_INTERVAL), np.arange(-theta_min, -1, THETA_INTERVAL)))
+    theta_values = np.concatenate((np.arange(0, theta_max / 180 * np.pi, THETA_INTERVAL / 180 * np.pi),
+                                   np.arange(-theta_min / 180 * np.pi, -1, THETA_INTERVAL / 180 * np.pi)))
 
     for theta in theta_values:
-        grid_center_x = np.mean(grid_points[:, 0])
-        grid_center_y = np.mean(grid_points[:, 1])
-
-        rotation_matrix = cv2.getRotationMatrix2D((grid_center_x, grid_center_y), theta, 1)
-        rotated_points = cv2.transform(np.array([grid_points]), rotation_matrix)[0]
+        rotated_points = rotate_grid_points(grid_points, contour, theta)
 
         # Count the number of points inside the contour
         radius = VACUUM_CUP_RADIUS / T[0, 0]
@@ -159,75 +158,106 @@ def optimize_grid_angle(contour, T):
         indices, grid_points_inside_contour = zip(
             *indices_and_points_inside_contour) if indices_and_points_inside_contour else ([], [])
 
+        radius_around = -100
+        indices_and_points_around_contour = [(index, point) for index, point in enumerate(rotated_points)
+                                             if cv2.pointPolygonTest(contour, tuple(map(int, point)),
+                                                                     True) >= radius_around]
+        indices_around, grid_points_around = zip(
+            *indices_and_points_around_contour) if indices_and_points_around_contour else ([], [])
+
         # Saves the translation vector and angle if a new max points is reached. Also updates the current max.
         if points_inside_contour > max_points_inside_contour:
             max_points_inside_contour = points_inside_contour
-            optimal_rotation_angle = theta
+            optimal_rotation_angle = theta * 180 / np.pi
             optimal_grid_points_inside_contour = grid_points_inside_contour
             optimal_indices = indices
+            surrounding_indices = indices_around
+            surrounding_grid_points = grid_points_around
 
             # If the number of points inside the contour is higher than 10 the functions breaks (we're satisfied)
             if max_points_inside_contour > MAX_POINTS_INSIDE_CONTOUR:
                 break
+    return max_points_inside_contour, optimal_rotation_angle, grid_points, surrounding_grid_points, \
+           surrounding_indices
 
-    return max_points_inside_contour, optimal_rotation_angle, grid_points, optimal_grid_points_inside_contour, \
-           optimal_indices
 
+def rotate_grid_points(grid_points, contour, theta):
+    # Translation to the centroid of the grid points
+    translation = np.array([int(np.mean(grid_points[:, 0])),
+                            int(np.mean(grid_points[:, 1]))])
+    zerod_grid_points = grid_points[:, :2] - translation
 
-def calculate_angles(angle):
-    """
-    Ensure the angle is within the range of 0 to 180 degrees.
-    Handle the special case where the angle is 0 to avoid division by zero.
-    Calculate and return two values, x and y, using a specific formula.
+    # Rotation matrix
+    rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)],
+                                [np.sin(theta), np.cos(theta)]])
 
-    :param angle: The input angle to be processed.
-    :return: Tuple containing two values, x and y.
-    """
+    # Rotate the points
+    points = zerod_grid_points[:, :2].T
+    rotated_points = np.dot(rotation_matrix, points).T
 
-    # Ensure angle is within the range of 0 to 180
-    angle = (angle % 180 + 180) % 180
+    # Calculate centroid of the contour
+    M = cv2.moments(contour)
+    centroid_x = int(M['m10'] / M['m00'])
+    centroid_y = int(M['m01'] / M['m00'])
 
-    # Avoid division by zero when angle is 0
-    if angle == 0:
-        return 0, np.pi
+    # Translation to the centroid of the rotated points
+    translation = np.array([int(centroid_x - np.mean(rotated_points[:, 0])),
+                            int(centroid_y - np.mean(rotated_points[:, 1]))])
 
-    ratio = 180 / angle
-    x = np.sqrt(np.pi ** 2 / ratio)
-    y = np.sqrt(np.pi ** 2 - x ** 2)
-    return x, y
+    # Apply translation
+    rotated_points[:, :2] += translation
+
+    return rotated_points
 
 
 def get_ply_information(contour, T, show_plot=False):
-    n, optimal_translation_vector, optimal_rotation_angle, grid_points, grid_points_inside_contour, optimal_indices = \
-        optimize_grid(contour, T)
+    n, optimal_rotation_angle, grid_points, grid_points_inside_contour, optimal_indices = \
+        optimize_grid_angle(contour, T)
 
-    translated_grid_points = grid_points[:, 0:2] + optimal_translation_vector
-    grid_center_x = np.mean(grid_points[:, 0]) + optimal_translation_vector[0]
-    grid_center_y = np.mean(grid_points[:, 1]) + optimal_translation_vector[1]
-    pose_x = grid_center_x * T[0, 0] + T[0, 1]
-    pose_y = -(grid_center_y * T[1, 0] + T[1, 1])  # Negate the y-coordinate
-    
+    # translated_grid_points = grid_points[:, 0:2] + optimal_translation_vector
+    M = cv2.moments(contour)
+    centroid_x = int(M['m10'] / M['m00'])
+    centroid_y = int(M['m01'] / M['m00'])
+    angle = -0.0328400808855735
+    rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)],
+                                [np.sin(angle), np.cos(angle)]])
+
+    grid_points = grid_points[:, :2].T
+    grid_points = np.dot(rotation_matrix, grid_points).T
+
+    grid_center_x = np.mean(grid_points[:, 0])
+    grid_center_y = np.mean(grid_points[:, 1])
+
+    print(f"Contour: {centroid_x, centroid_y}\n"
+          f"Grid: {grid_center_x, grid_center_y}")
+
+    pose_y = grid_center_x * T[0, 0] + T[0, 1]
+    pose_x = -(grid_center_y * T[1, 0] + T[1, 1])  # Negate the y-coordinate
     robot_pose = np.array([pose_x, pose_y]) / 1000
-    Rx, Ry = calculate_angles(optimal_rotation_angle)
     if show_plot:
         print(f"Number of ponts: {n}\n"
               f"Angle: {optimal_rotation_angle}, (x, y) : ({grid_center_x}, {grid_center_y})\n"
-              f"Robot info: (x, y, z, Rx, Ry, Rz): {(robot_pose[0], robot_pose[1], 10, Rx, Ry, 0)}\n"
+              f"Corrected robot info: (x, y, z, Rx, Ry, Rz): {(robot_pose[0], robot_pose[1], 10, 0, 0, optimal_rotation_angle / 180 * np.pi)}\n"
               f"Vacuum cups: {optimal_indices}")
 
         image = np.ones((IMAGE_SIZE[0], IMAGE_SIZE[1], 3), dtype=np.uint8) * 0
         cv2.drawContours(image, [contour], -1, (0, 0, 255), thickness=cv2.FILLED)
         rotation_matrix = cv2.getRotationMatrix2D((grid_center_x, grid_center_y), optimal_rotation_angle, 1)
-        final_rotated_grid_points = cv2.transform(np.array([translated_grid_points]), rotation_matrix)[0]
+        final_rotated_grid_points = cv2.transform(np.array([grid_points]), rotation_matrix)[0]
 
-        radius = int(VACUUM_CUP_RADIUS / T[1, 0])
+        radius = abs(int(VACUUM_CUP_RADIUS / T[0, 0]))
+
         for point in final_rotated_grid_points:
             cv2.circle(image, tuple(map(int, point)), 2, (255, 0, 0), -1)
-        for point in grid_points_inside_contour:
+        for i in range(len(grid_points_inside_contour)):
+            point = grid_points_inside_contour[i]
+            index = optimal_indices[i]
             cv2.circle(image, tuple(map(int, point)), radius, (0, 255, 0), -1)
-        cv2.circle(image, (int(grid_center_x), int(grid_center_y)), 5, (255, 255, 255), -1)
-        cv2.imshow('Optimal Position, Rotation, and Grid Points Inside Contour', image)
+            cv2.putText(image, str(index), tuple(map(int, point)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        cv2.circle(image, (int(grid_center_x), int(grid_center_y)), 10, (255, 255, 255), -1)
+        pic = cv2.resize(image, (1080, 853))
+        cv2.imshow('Optimal Position, Rotation, and Grid Points Inside Contour', pic)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-    error_code = 0
-    return robot_pose[0], robot_pose[1], Rx, Ry, error_code, optimal_indices
+
+    return robot_pose[0], robot_pose[1], optimal_rotation_angle, optimal_indices
