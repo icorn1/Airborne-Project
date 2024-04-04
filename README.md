@@ -107,4 +107,6 @@ Contents of the GUI:
 - Big green button to start the program.
 - Settings boxes to select wheter user wants to do calibration or run a certain laminate.
 - Corresponding laminate image.
+
+This URCap uses source code from another URCap, credits to https://github.com/BomMadsen/URCap-ScriptCommunicator.
 </details>
