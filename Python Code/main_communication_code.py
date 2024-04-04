@@ -1,4 +1,4 @@
-from machine_vision_functions import get_ply_information, calculate_angles
+from machine_vision_functions import get_ply_information
 from calibrate import calibrate, undistort_image
 from compare_contours import find_best_match
 from PLC_communication import write_values
@@ -14,9 +14,9 @@ import os
 import cv2
 
 # Variables
-MASKING_THRESHOLD = 180
+MASKING_THRESHOLD = 160
 INVERT_MASK = 0
-MINIMUM_CONTOUR_AREA = 200
+MINIMUM_CONTOUR_AREA = 10000
 CTI_FILE_PATH = "C:/Program Files/Balluff/ImpactAcquire/bin/x64/mvGenTLProducer.cti"
 
 
@@ -71,7 +71,7 @@ def perform_calibration():
               'DistortionMatrix.npz', (4, 4))
 
 
-def send_ply_information2test():
+def send_ply_information():
     mtx_data = np.load('calibration_matrices/IntrinsicMatrix.npz')
     mtx = mtx_data['arr_0'].astype(np.float64)
     dst_data = np.load('calibration_matrices/DistortionMatrix.npz')
@@ -86,6 +86,11 @@ def send_ply_information2test():
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
         contours = [contour for contour in contours if cv2.contourArea(contour) > MINIMUM_CONTOUR_AREA]
         cv2.drawContours(image, contours, -1, (0, 255, 255), 3)
+        # pic = cv2.resize(image, (1080, 858))
+        #
+        # cv2.imshow('img', pic)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
         model_contour = load_contour(f"contours/{ply}_mesh_contour.txt")
 
@@ -118,6 +123,7 @@ def send_ply_information2test():
             rzc -= np.pi * 2
         elif rzc < -np.pi:
             rzc += np.pi * 2
+
         print("PC: Sending error_code")
         error_code = 0
         client_socket.send(format_nums(([error_code])).encode())
@@ -188,6 +194,6 @@ if __name__ == '__main__':
 
             # used when running send_ply_information2test()
             print("UR: Laminate ID is ", Laminate_ID, "\n")
-            send_ply_information2test()
+            send_ply_information()
         else:
             print(task)
