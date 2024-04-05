@@ -3,6 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neighbors import NearestNeighbors
 
+ACCURACY = 10  # Pixels
+SCALING_FACTOR = 1.46  # The PNG generated from the DXF has a scale X times bigger than the images from the camera
+ANGLE_OPTIMIZATION_ITERATIONS = 200
+
 
 def plot(img, cnts, fail_point_inds_per_cnt, trans_model_contour_points):
     model_color = "C1"
@@ -87,7 +91,7 @@ def get_trans_matrix_and_transform(theta, center_point, center_shift, contour):
     return cnt_trans, trans_matrix
 
 
-def find_transform(model_contours, cnts, img, max_dev):
+def find_transform(model_contours, cnts, max_dev):
     theta_model, center_model = get_orientation_pca(model_contours[0])
     theta_part, center_part = get_orientation_pca(cnts[0])
     theta = theta_part - theta_model
@@ -102,20 +106,18 @@ def find_transform(model_contours, cnts, img, max_dev):
     min_sum = np.sum(distances)
     best_angle = theta
     if max(distances) > max_dev:
-        angles = np.linspace(theta - np.pi, theta + np.pi, num=200)
+        angles = np.linspace(theta - np.pi, theta + np.pi, num=ANGLE_OPTIMIZATION_ITERATIONS)
+        
         for angle in angles:
             cnt_trans, trans_matrix = get_trans_matrix_and_transform(angle, center_model, center_shift,
                                                                      model_contours[0])
             distances, _ = NearestNeighbors(n_neighbors=1).fit(
                 cnt_trans.reshape(-1, 2)).kneighbors(cnts[0].reshape(-1, 2))
 
-            # is_over = distances.reshape(1, -1)[0] > max_dev
-            # fail_point_inds_per_cnt = [[]]
-            # fail_point_inds_per_cnt[0], = np.where(is_over)
-            # plot(img, cnts, fail_point_inds_per_cnt, cnt_trans)
             if np.sum(distances) < min_sum:
                 min_sum = np.sum(distances)
                 best_angle = angle
+                
             if max(distances) < max_dev:
                 break
     cnt_trans, trans_matrix = get_trans_matrix_and_transform(best_angle, center_model, center_shift,
@@ -123,7 +125,7 @@ def find_transform(model_contours, cnts, img, max_dev):
     return cnt_trans, best_angle, min_sum
 
 
-def match_contour_to_model(cnts, model_contours, max_dev, img_ppmm, mdl_ppmm, img, show_plot=False):
+def match_contour_to_model(cnts, model_contours, max_dev, img_ppmm, img, show_plot=False):
     """Checking if the contours got from the image match with the
     defined model contours.
 
@@ -132,7 +134,6 @@ def match_contour_to_model(cnts, model_contours, max_dev, img_ppmm, mdl_ppmm, im
         model_contours (list of numpy arrays): Contours list as returned by OpenCV
         max_dev (float): Maximum deviation from the model (in pixels)
         img_ppmm (float): Pixel per millimeter ratio for the image.
-        mdl_ppmm (float): Pixel per millimeter ratio for the model image.
         img (numpy array): Image to overlay the results on.
         show_plot (bool): Whether to plot the results or not.
 
@@ -150,11 +151,11 @@ def match_contour_to_model(cnts, model_contours, max_dev, img_ppmm, mdl_ppmm, im
         final_result = False
         fail_reason = "The number of holes do not match"
 
-    scale = img_ppmm / mdl_ppmm
+    scale = img_ppmm 
     model_contours = model_contours
     model_contours[0] = model_contours[0] * scale
 
-    cnt_trans, best_angle, min_sum = find_transform(model_contours, cnts, img, max_dev)
+    cnt_trans, best_angle, min_sum = find_transform(model_contours, cnts, max_dev)
 
     cnt_trans = cnt_trans.reshape(-1, 2)
     cnt_inds_and_mdl_inds = {0: 0}
@@ -189,7 +190,7 @@ def find_best_match(contours, model_contour, img, show_plot=False):
         return best_index, angle, ret
 
     for index, contour in enumerate(contours):
-        angle, score, ret, reason = match_contour_to_model([contour], [model_contour], 10, 1.5, 1, img,
+        angle, score, ret, reason = match_contour_to_model([contour], [model_contour], ACCURACY, SCALING_FACTOR, img,
                                                            show_plot=show_plot)
         if ret:
             angle = angle
