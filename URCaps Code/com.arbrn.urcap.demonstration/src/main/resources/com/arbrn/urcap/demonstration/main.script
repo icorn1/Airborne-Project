@@ -3,170 +3,167 @@
 # In the set_standard_analog_out(0, 0.3) statement 0.3 can be changed from 0 to 1 to adjust the brightness of the lamp.
 
 def Initialise():
- set_standard_analog_out(0, 0.3)
- set_standard_analog_out(1, 0.0)
-
- set_standard_digital_out(0, True)
- set_standard_digital_out(1, True)
- set_standard_digital_out(3, True)
- set_standard_digital_out(2, True)
- sleep(1)
- set_standard_digital_out(4, True)
- set_standard_digital_out(5, True)
- set_standard_digital_out(6, True)
- set_standard_digital_out(7, True)
-
- global START_LOC = p[-0.100, -0.450, 0.300, 3.14, 0, 0]
- global MOVE_DOWN = p[0,0,0.130,0,0,0]
- global MOVE_UP   = p[0,0,-0.130,0,0,0]
- global IP_HOST = "192.168.0.11"
- global PORT = 50001
- global PLY_ID = 3
- global Z_HEIGHT = 0.300  # in meters
- movej(START_LOC)
-end
-
-# Run this code on the robot to de-initialise everything and turn off all the digital output pins.
-
-def De_initialise():
- set_standard_analog_out(0, 0.0)
- set_standard_analog_out(1, 0.0)
- set_standard_digital_out(0, False)
- set_standard_digital_out(1, False)
- set_standard_digital_out(2, False)
- set_standard_digital_out(3, False)
- set_standard_digital_out(4, False)
- set_standard_digital_out(5, False)
- set_standard_digital_out(6, False)
- set_standard_digital_out(7, False)
- movej(START_LOC)
-end
-
-
-
-# Discription to function calibration()
-# This function first moves the robot to an appropriate location from where to start
-# the rest of all the actions. The function opens a connection to Host, this is the 
-# PC used. It sends the command "clibration" to the PC so that the PC knows which 
-# function is being run. The function gets an error code 0 or 1 from the PC, 0 means
-# that a new pose can be send by the PC, 1 means that no poses can be send, this happens
-# when all poses have been done already. If the error code is 0 the robot will move
-# to the pose it gets from the PC and then send to the PC that the PC can make a
-# picture. The robot waits for a while to give time to the PC to make the picture
-
-def calibration():
-  # movel(p[-0.400, 0.000, 0.300, 0, 0, 0])
-  
-   while socket_open(IP_HOST, PORT) == True:
-    socket_send_string("calibration")
-    error = socket_read_ascii_float(1, "socket_0")
-  
-    if error[1] == 1:
-  #   movel(p[-0.250, -0.570, 0.300, 0, 0, 0])
-  #   movel(p[-0.250, -0.570, 0.300, 0.93, 1.16, 0])
-  #   movel(p[-0.250, -0.570, 0.300, 2.0, 2.5, 0])
-     socket_close("socket_0")
-     break
-    end
-  
-    if error[1] == 0:
-     data = socket_read_ascii_float(6, "socket_0")
-     calibration_location = p[data[1], data[2], data[3], data[4], data[5], data[6]]
-     movel(calibration_location)
-     socket_send_string("ready for picture")
-     sleep(6)
-     socket_close("socket_0")
-    end
-   end
-end
-
-
-
-# Discription to function start_moving_ply()
-# This function opens a connection to Host, this is the PC used. It sends the command 
-# "moving" to the PC so that the PC knows which function is being run. The ply ID is
-# send to the PC. The PC will send the location of the ply with the right ply ID back.
-# If the ply is not found, an error_code of 1 is returned by the PC and the UR will go
-# to the GUI and there it will ask if you want to skip the ply or chose a new one to fill
-# the place of the missing ply. when the robot is at the ply (error_code = 0) it will
-# send a command to the PC to activate the tool end, which consists of vacu m cups.
-# After this the robot moves to where the composite should be build.
-
-def move_ply(laminate_id):
-  if socket_open(IP_HOST, PORT) == True:
-    socket_send_string("moving")
-    sleep(0.1)
-    socket_send_string(laminate_id)
-
-    while True:
-      response_code = socket_read_ascii_float(1, "socket_0", 20)
-
-      if response_code[1] == 0:
-        data  = socket_read_ascii_float(6, "socket_0", 20)
-
-        ply_loc  = p[data[1], data[2], Z_HEIGHT, 3.14, 0, 0]
-        com_loc  = p[data[4], data[5], Z_HEIGHT, 3.14, 0, 0]
-
-        movej(ply_loc)
-        movej(pose_trans(ply_loc, p[0, 0, 0, 0, 0, data[3]]))
-        movel(pose_trans(get_actual_tcp_pose(), MOVE_DOWN))
-        socket_send_string("activate")
-        sleep(0.3)
-        movel(pose_trans(get_actual_tcp_pose(), MOVE_UP))
-        sensor = get_standard_analog_in(1)
-
-        # There is a ply attached
-        if sensor < 0.1:
-          movej(START_LOC)
-          movel(com_loc)
-          movej(pose_trans(get_actual_tcp_pose(), p[0, 0, 0, 0, 0, data[6]]))
-          movel(pose_trans(get_actual_tcp_pose(), MOVE_DOWN))
-          socket_send_string("Deactivate")
-          socket_send_string("3")
-          textmsg("succesful pickup")
-          sleep(0.3)
-          movel(pose_trans(get_actual_tcp_pose(), MOVE_UP))
-          movej(START_LOC)
-
-        # There is no ply attached
-        elif sensor > 0.1:
-          socket_send_string("Deactivate")
-          movej(START_LOC)
-          socket_send_string("4")
-          popup("Try moving the ply to a different location.", "Failed to pick up the ply", error=True)
-        end
-
-      elif response_code[1] == 1:
-        textmsg("Laminate finished")
-        break
-
-      # Error control
-      elif response_code[1] == 2:
-        popup("A detected ply has been labeled as incorrect / not needed for this laminate. Please submit the requiered plies", "Incorrect ply submitted ", error=True)
-        break
-
-      elif response_code[1] == 3:
-        popup("One (or more) ply(ies) are out of the robot reach or might cause a collition with enviornment", "Ply out of reach", error=True)
-        break
-      
-      elif response_code[1] == 4:
-        popup("No plies have been detected on the table. Are there plies on the table? Is the light on?", "No plies found", error=True)
-        break
-        
-
-
-      end
-
-    end
-    socket_close("socket_0")
-  end
-end
+  set_standard_analog_out(0, 0.3)
+  set_standard_analog_out(1, 0.0)
  
+  set_standard_digital_out(0, True)
+  set_standard_digital_out(1, True)
+  set_standard_digital_out(3, True)
+  set_standard_digital_out(2, True)
+  sleep(1)
+  set_standard_digital_out(4, True)
+  set_standard_digital_out(5, True)
+  set_standard_digital_out(6, True)
+  set_standard_digital_out(7, True)
+ 
+  global START_LOC = p[-0.100, -0.450, 0.300, 0, 3.14, 0]  
+  global MOVE_DOWN = p[0,0,0.130,0,0,0]
+  global MOVE_UP   = p[0,0,-0.130,0,0,0]
+  global IP_HOST = "192.168.0.11"
+  global PORT = 50001
+  global PLY_ID = 3
+  global Z_HEIGHT = 0.300  # in meters
+  movej(START_LOC)
+ end
+ 
+ # Run this code on the robot to de-initialise everything and turn off all the digital output pins.
+ 
+ def De_initialise():
+  set_standard_analog_out(0, 0.0)
+  set_standard_analog_out(1, 0.0)
+  set_standard_digital_out(0, False)
+  set_standard_digital_out(1, False)
+  set_standard_digital_out(2, False)
+  set_standard_digital_out(3, False)
+  set_standard_digital_out(4, False)
+  set_standard_digital_out(5, False)
+  set_standard_digital_out(6, False)
+  set_standard_digital_out(7, False)
+  movej(START_LOC)
+ end
+ 
+ 
+ 
+ # Discription to function calibration()
+ # This function first moves the robot to an appropriate location from where to start
+ # the rest of all the actions. The function opens a connection to Host, this is the 
+ # PC used. It sends the command "clibration" to the PC so that the PC knows which 
+ # function is being run. The function gets an error code 0 or 1 from the PC, 0 means
+ # that a new pose can be send by the PC, 1 means that no poses can be send, this happens
+ # when all poses have been done already. If the error code is 0 the robot will move
+ # to the pose it gets from the PC and then send to the PC that the PC can make a
+ # picture. The robot waits for a while to give time to the PC to make the picture
+ 
+ def calibration():
+   # movel(p[-0.400, 0.000, 0.300, 0, 0, 0])
+   
+    while socket_open(IP_HOST, PORT) == True:
+     socket_send_string("calibration")
+     error = socket_read_ascii_float(1, "socket_0")
+   
+     if error[1] == 1:
+   #   movel(p[-0.250, -0.570, 0.300, 0, 0, 0])
+   #   movel(p[-0.250, -0.570, 0.300, 0.93, 1.16, 0])
+   #   movel(p[-0.250, -0.570, 0.300, 2.0, 2.5, 0])
+      socket_close("socket_0")
+      break
+     end
+   
+     if error[1] == 0:
+      data = socket_read_ascii_float(6, "socket_0")
+      calibration_location = p[data[1], data[2], data[3], data[4], data[5], data[6]]
+      movel(calibration_location)
+      socket_send_string("ready for picture")
+      sleep(6)
+      socket_close("socket_0")
+     end
+    end
+ end
+ 
+ 
+ 
+ # Discription to function start_moving_ply()
+ # This function opens a connection to Host, this is the PC used. It sends the command 
+ # "moving" to the PC so that the PC knows which function is being run. The ply ID is
+ # send to the PC. The PC will send the location of the ply with the right ply ID back.
+ # If the ply is not found, an error_code of 1 is returned by the PC and the UR will go
+ # to the GUI and there it will ask if you want to skip the ply or chose a new one to fill
+ # the place of the missing ply. when the robot is at the ply (error_code = 0) it will
+ # send a command to the PC to activate the tool end, which consists of vacu m cups.
+ # After this the robot moves to where the composite should be build.
+ 
+ def move_ply(laminate_id):
+   if socket_open(IP_HOST, PORT) == True:
+     socket_send_string("moving")
+     sleep(0.1)
+     socket_send_string(laminate_id)
+ 
+     while True:
+       response_code = socket_read_ascii_float(1, "socket_0", 20)
+ 
+       if response_code[1] == 0:
+         data  = socket_read_ascii_float(6, "socket_0", 20)
+ 
+         ply_loc  = p[data[1], data[2], Z_HEIGHT, 0, 3.14, 0]               
+         com_loc  = p[data[4], data[5], Z_HEIGHT, 0, 3.14, 0]   
 
-# WARNING: DO NOT UNCOMMENT.
-# These functions are manually for the code to run in src/TestInstallationNodeContribution.
-
-# Initialise()
-# calibration()
-# move_ply()
-# De_initialise()
+         movej(ply_loc)
+         movej(pose_trans(ply_loc, p[0, 0, 0, 0, 0, data[3]]))
+         movel(pose_trans(get_actual_tcp_pose(), MOVE_DOWN))
+         socket_send_string("activate")
+         sleep(0.3)
+         movel(pose_trans(get_actual_tcp_pose(), MOVE_UP))
+         sensor = get_standard_analog_in(1)
+ 
+         # There is a ply attached
+         if sensor < 0.1:
+           movej(START_LOC)
+           movel(com_loc)
+           movej(pose_trans(get_actual_tcp_pose(), p[0, 0, 0, 0, 0, data[6]]))
+           movel(pose_trans(get_actual_tcp_pose(), p[0, 0, .120, 0, 0, 0]))            
+           socket_send_string("Deactivate")
+           socket_send_string("3")
+           textmsg("succesful pickup")
+           sleep(0.3)
+           movel(pose_trans(get_actual_tcp_pose(), MOVE_UP))
+           movej(pose_trans(get_actual_tcp_pose(), p[0, 0, 0, 0, 0, -data[6]])) 
+           movej(START_LOC)
+ 
+         # There is no ply attached
+         elif sensor > 0.1:
+           socket_send_string("Deactivate")
+           movej(START_LOC)
+           socket_send_string("4")
+           popup("Failed to pick up the ply. Try moving the ply to a different location, or turning the air valve on.", "Failed to pick up the ply", error=True)
+         end
+ 
+       elif response_code[1] == 1:
+         textmsg("Laminate finished")
+         break
+ 
+       # Error control
+       elif response_code[1] == 2:
+         popup("A detected ply has been labeled as incorrect / not needed for this laminate. Please submit the requiered plies", "Incorrect ply submitted ", error=True)
+         break
+ 
+       elif response_code[1] == 3:
+         popup("One (or more) ply(ies) are out of the robot reach or might cause a collition with enviornment", "Ply out of reach", error=True)
+         break
+       
+       elif response_code[1] == 4:
+         popup("No plies have been detected on the table. Are there plies on the table? Is the light on?", "No plies found", error=True)
+         break
+       end
+     end
+     socket_close("socket_0")
+   end
+ end
+  
+ 
+ # WARNING: DO NOT UNCOMMENT.
+ # These functions are manually for the code to run in src/TestInstallationNodeContribution.
+ 
+ # Initialise()
+ # calibration()
+ # move_ply()
+ # De_initialise()

@@ -71,15 +71,14 @@ def perform_calibration():
               'DistortionMatrix.npz', (4, 4))
 
 
-def send_ply_information():
+def send_ply_information(j):
     mtx_data = np.load('calibration_matrices/IntrinsicMatrix.npz')
     mtx = mtx_data['arr_0'].astype(np.float64)
     dst_data = np.load('calibration_matrices/DistortionMatrix.npz')
     dst = dst_data['arr_0'].astype(np.float64)
     T_data = np.load('calibration_matrices/Translation.npz')
     T = T_data['arr_0']
-    pickedup_plies = 0
-    for i, ply in enumerate(laminate.ply_ids):
+    for i, ply in enumerate(laminate.ply_ids[j:]):
         image = get_genie_image()
         image = undistort_image(image, dst, mtx)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -126,10 +125,7 @@ def send_ply_information():
             rzc += np.pi * 2
 
         print("PC: Sending error_code")
-        if (pickedup_plies >= len(laminate.ply_ids)):
-            error_code = 1
-        else:
-            error_code = 0
+        error_code = 0
         client_socket.send(format_nums(([error_code])).encode())
 
         if error_code == 0:
@@ -159,9 +155,14 @@ def send_ply_information():
 
             if Error == 4:
                 print("UR: Failed pickup")
+                j = i 
+                send_ply_information(j)
+                break
 
-        if error_code == 1:
-            print("PC: error_code: 1 (Laminate finished) \n \n")
+    # If the for loop ends, the laminate is finished.  
+    print("PC: Sending error_code 1 (Laminate finished)")
+    error_code = 1
+    client_socket.send(format_nums(([error_code])).encode())
 
 
 """
