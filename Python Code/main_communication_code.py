@@ -71,7 +71,7 @@ def perform_calibration():
               'DistortionMatrix.npz', (4, 4))
 
 
-def send_ply_information(j):
+def send_ply_information(j=0):
     mtx_data = np.load('calibration_matrices/IntrinsicMatrix.npz')
     mtx = mtx_data['arr_0'].astype(np.float64)
     dst_data = np.load('calibration_matrices/DistortionMatrix.npz')
