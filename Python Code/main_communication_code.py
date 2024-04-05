@@ -165,6 +165,14 @@ def send_ply_information(j=0):
                 j = i 
                 send_ply_information(j)
                 break
+        elif error_code == 2:
+            print("PC: Wrong ply")
+            j = i 
+            send_ply_information(j)
+        elif error_code == 3:
+            print("PC: No plies found")
+            j = i 
+            send_ply_information(j)
 
     # If the for loop ends, the laminate is finished.  
     print("PC: Sending error_code 1 (Laminate finished)")
