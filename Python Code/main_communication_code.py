@@ -20,6 +20,8 @@ MASKING_THRESHOLD = 160
 INVERT_MASK = 0
 MINIMUM_CONTOUR_AREA = 10000
 CTI_FILE_PATH = "C:/Program Files/Balluff/ImpactAcquire/bin/x64/mvGenTLProducer.cti"
+SERIAL_NUMBER_CAM1 = 'S1129824'
+SERIAL_NUMBER_CAM2 = 'S1126491'
 
 
 def format_nums(integers):
@@ -32,11 +34,11 @@ def close_socket():
     server_socket.close()
 
 
-def get_genie_image():
+def get_genie_image(serial_number=SERIAL_NUMBER_CAM1):
     with Harvester() as h:
         h.add_file(CTI_FILE_PATH)
         h.update()
-        with h.create(0) as ia:
+        with h.create({'serial_number': serial_number}) as ia:
             ia.start()
             with ia.fetch() as buffer:
                 component = buffer.payload.components[0]
@@ -121,7 +123,7 @@ def send_ply_information(placed_plies=0):
 
         xc = DROPOFF_X - robot_translation[1]
         yc = DROPOFF_Y - robot_translation[0]
-        
+
         rz = -rotation / 180 * np.pi
         rzc = (-rotation + (ply_angle - (angle * 180 / np.pi))) / 180 * np.pi
         if rzc > np.pi:
@@ -155,6 +157,7 @@ def send_ply_information(placed_plies=0):
             Error = client_socket.recv(1024).decode()
             if Error == '3':
                 print("UR: pickup succesful")
+
                 placed_plies += 1
 
             if Error == '4':
@@ -163,20 +166,20 @@ def send_ply_information(placed_plies=0):
                 print("UR:", activation_code, "\n")
                 send_ply_information(placed_plies)
                 break
-                
+
         elif error_code == 2:
             print("PC: Wrong ply")
             activation_code = client_socket.recv(1024).decode()
             print("UR:", activation_code, "\n")
             send_ply_information(placed_plies)
-            
+
         elif error_code == 3:
             print("PC: No plies found")
             activation_code = client_socket.recv(1024).decode()
             print("UR:", activation_code, "\n")
             send_ply_information(placed_plies)
 
-    # If the for loop ends, the laminate is finished.  
+    # If the for loop ends, the laminate is finished.
     print("PC: Sending error_code 1 (Laminate finished)")
     error_code = 1
     client_socket.send(format_nums(([error_code])).encode())
