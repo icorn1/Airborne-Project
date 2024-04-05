@@ -134,7 +134,7 @@ def Initialise():
            socket_send_string("Deactivate")
            movej(START_LOC)
            socket_send_string("4")
-           popup("Failed to pick up the ply. Try moving the ply to a different location, or turning the air valve on.", "Failed to pick up the ply", error=True)
+           popup("Failed to pick up the ply. Try moving the ply to a different location, or turning the air valve on.", "Failed to pick up the ply", error=True, blocking=True)
          end
  
        elif response_code[1] == 1:
@@ -143,16 +143,16 @@ def Initialise():
  
        # Error control
        elif response_code[1] == 2:
-         popup("A detected ply has been labeled as incorrect / not needed for this laminate. Please submit the requiered plies", "Incorrect ply submitted ", error=True)
-         break
- 
-       elif response_code[1] == 3:
-         popup("One (or more) ply(ies) are out of the robot reach or might cause a collition with enviornment", "Ply out of reach", error=True)
-         break
+         popup("A detected ply has been labeled as incorrect / not needed for this laminate. Please submit the requiered plies", "Incorrect ply submitted ", error=True, blocking=True)
+         socket_send_string("continue")
        
+       elif response_code[1] == 3:
+         popup ("No plies have been detected on the table. Are there plies on the table? Is the light on?", "No plies found", error=True, blocking=True)
+         socket_send_string("continue")
+
        elif response_code[1] == 4:
-         popup("No plies have been detected on the table. Are there plies on the table? Is the light on?", "No plies found", error=True)
-         break
+         popup("One (or more) ply(ies) are out of the robot reach or might cause a collition with enviornment", "Ply out of reach", error=True, blocking=True)
+         socket_send_string("continue")
        end
      end
      socket_close("socket_0")
