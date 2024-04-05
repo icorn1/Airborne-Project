@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neighbors import NearestNeighbors
 
-ACCURACY = 10  # Pixels
+ACCURACY = 15  # Pixels
 SCALING_FACTOR = 1.46  # The PNG generated from the DXF has a scale X times bigger than the images from the camera
 ANGLE_OPTIMIZATION_ITERATIONS = 200
 
