@@ -168,13 +168,13 @@ def send_ply_information(j=0):
         elif error_code == 2:
             print("PC: Wrong ply")
             activation_code = client_socket.recv(1024).decode()
-            print("UR:, activation_code, "\n") 
+            print("UR:", activation_code, "\n") 
             j = i 
             send_ply_information(j)
         elif error_code == 3:
             print("PC: No plies found")
             activation_code = client_socket.recv(1024).decode()
-            print("UR:, activation_code, "\n") 
+            print("UR:", activation_code, "\n") 
             j = i 
             send_ply_information(j)
 
