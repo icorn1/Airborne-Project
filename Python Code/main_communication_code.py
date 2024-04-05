@@ -84,9 +84,9 @@ def send_ply_information(j=0):
         # 1 = the laminate is finished
         # 2 = Wrong ply
         # 3 = No contours are found in the image
-        error_code = 0
         i = j
-
+        error_code = 0
+        
         image = get_genie_image()
         image = undistort_image(image, dst, mtx)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
