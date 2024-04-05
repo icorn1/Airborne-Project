@@ -79,6 +79,7 @@ def send_ply_information(j=0):
     T_data = np.load('calibration_matrices/Translation.npz')
     T = T_data['arr_0']
     for i, ply in enumerate(laminate.ply_ids[j:]):
+        i = j
         # Error codes and their meaning:x
         # 0 = there is no problem, the ply is found.
         # 1 = the laminate is finished
