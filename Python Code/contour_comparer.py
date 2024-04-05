@@ -1,12 +1,44 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import warnings
 from sklearn.neighbors import NearestNeighbors
-from contours import load_contour
-from harvesters.core import Harvester
 
-CTI_FILE_PATH = "C:/Program Files/Balluff/ImpactAcquire/bin/x64/mvGenTLProducer.cti"
+
+def plot(img, cnts, fail_point_inds_per_cnt, trans_model_contour_points):
+    model_color = "C1"
+    object_color = "C0"
+    fail_color = "r."
+    plt.imshow(img, cmap="gray")
+    for i, cnt in enumerate(cnts):
+        plt.plot(cnt.reshape(-1, 2)[:, 0], cnt.reshape(-1, 2)[:, 1], color=object_color, label='Part')
+        if len(fail_point_inds_per_cnt[0]) > 0:
+            fail_points = cnt.reshape(-1, 2)[fail_point_inds_per_cnt[i], :]
+            plt.plot(fail_points[:, 0], fail_points[:, 1], fail_color, markersize=5, label='Fail points')
+
+    for to_object in [trans_model_contour_points]:
+        to_object = np.append(to_object, [to_object[0]], axis=0)
+        plt.plot(to_object.reshape(-1, 2)[:, 0], to_object.reshape(-1, 2)[:, 1], color=model_color, label='Model')
+
+    plt.legend()
+    plt.show()
+
+
+def load_contour(filename):
+    """
+    Load a contour from a text file.
+
+    :param filename: The name of the text file containing the contour data.
+    :return: Loaded contour represented as a NumPy array with shape (-1, 1, 2).
+    """
+    # Load the contour from the text file
+    loaded_contour_reshaped = np.loadtxt(filename)
+
+    # Reshape the loaded contour back to its original shape
+    loaded_contour = loaded_contour_reshaped.reshape(-1, 1, 2)
+
+    # Convert the loaded contour to integers
+    loaded_contour = loaded_contour.astype(int)
+    return loaded_contour
 
 
 def get_orientation_pca(pts):
@@ -55,7 +87,7 @@ def get_trans_matrix_and_transform(theta, center_point, center_shift, contour):
     return cnt_trans, trans_matrix
 
 
-def find_transform(model_contours, cnts):
+def find_transform(model_contours, cnts, img, max_dev):
     theta_model, center_model = get_orientation_pca(model_contours[0])
     theta_part, center_part = get_orientation_pca(cnts[0])
     theta = theta_part - theta_model
@@ -69,17 +101,22 @@ def find_transform(model_contours, cnts):
 
     min_sum = np.sum(distances)
     best_angle = theta
-    if max(distances) > 100:
+    if max(distances) > max_dev:
         angles = np.linspace(theta - np.pi, theta + np.pi, num=200)
         for angle in angles:
             cnt_trans, trans_matrix = get_trans_matrix_and_transform(angle, center_model, center_shift,
                                                                      model_contours[0])
             distances, _ = NearestNeighbors(n_neighbors=1).fit(
                 cnt_trans.reshape(-1, 2)).kneighbors(cnts[0].reshape(-1, 2))
+
+            # is_over = distances.reshape(1, -1)[0] > max_dev
+            # fail_point_inds_per_cnt = [[]]
+            # fail_point_inds_per_cnt[0], = np.where(is_over)
+            # plot(img, cnts, fail_point_inds_per_cnt, cnt_trans)
             if np.sum(distances) < min_sum:
                 min_sum = np.sum(distances)
                 best_angle = angle
-            if max(distances) < 100:
+            if max(distances) < max_dev:
                 break
     cnt_trans, trans_matrix = get_trans_matrix_and_transform(best_angle, center_model, center_shift,
                                                              model_contours[0])
@@ -117,7 +154,7 @@ def match_contour_to_model(cnts, model_contours, max_dev, img_ppmm, mdl_ppmm, im
     model_contours = model_contours
     model_contours[0] = model_contours[0] * scale
 
-    cnt_trans, best_angle, min_sum = find_transform(model_contours, cnts)
+    cnt_trans, best_angle, min_sum = find_transform(model_contours, cnts, img, max_dev)
 
     cnt_trans = cnt_trans.reshape(-1, 2)
     cnt_inds_and_mdl_inds = {0: 0}
@@ -137,23 +174,7 @@ def match_contour_to_model(cnts, model_contours, max_dev, img_ppmm, mdl_ppmm, im
                 fail_reason = "Too big a deviation"
 
     if show_plot:
-        # Drawing the result
-        model_color = "C1"
-        object_color = "C0"
-        fail_color = "r."
-        plt.imshow(img, cmap="gray")
-        for i, cnt in enumerate(cnts):
-            plt.plot(cnt.reshape(-1, 2)[:, 0], cnt.reshape(-1, 2)[:, 1], color=object_color, label='Part')
-            if len(fail_point_inds_per_cnt[0]) > 0:
-                fail_points = cnt.reshape(-1, 2)[fail_point_inds_per_cnt[i], :]
-                plt.plot(fail_points[:, 0], fail_points[:, 1], fail_color, markersize=5, label='Fail points')
-
-        for to_object in trans_model_contour_points:
-            to_object = np.append(to_object, [to_object[0]], axis=0)
-            plt.plot(to_object[:, 0], to_object[:, 1], color=model_color, label='Model')
-
-        plt.legend()
-        plt.show()
+        plot(img, cnts, fail_point_inds_per_cnt, trans_model_contour_points)
 
     return best_angle, min_sum, final_result, fail_reason
 
@@ -162,8 +183,13 @@ def find_best_match(contours, model_contour, img, show_plot=False):
     best_score = float('inf')
     best_index = 0
     angle = 0
+    ret = False
+
+    if len(contours) == 0:
+        return best_index, angle, ret
+
     for index, contour in enumerate(contours):
-        angle, score, ret, reason = match_contour_to_model([contour], [model_contour], 30, 1.5, 1, img,
+        angle, score, ret, reason = match_contour_to_model([contour], [model_contour], 10, 1.5, 1, img,
                                                            show_plot=show_plot)
         if ret:
             angle = angle
@@ -173,5 +199,4 @@ def find_best_match(contours, model_contour, img, show_plot=False):
             best_score = score
             angle = angle
             best_index = index
-    return best_index, angle
-
+    return best_index, angle, ret
