@@ -151,7 +151,6 @@ def send_ply_information(j):
             Error = client_socket.recv(1024).decode()
             if Error == 3:
                 print("UR: pickup succesful")
-                pickedup_plies += 1
 
             if Error == 4:
                 print("UR: Failed pickup")
