@@ -135,6 +135,7 @@ def Initialise():
            movej(START_LOC)
            socket_send_string("4")
            popup("Failed to pick up the ply. Try moving the ply to a different location, or turning the air valve on.", "Failed to pick up the ply", error=True, blocking=True)
+           socket_send_string("continue")
          end
  
        elif response_code[1] == 1:
