@@ -11,6 +11,7 @@ THETA_INTERVAL = 1  # Optimization interval
 XY_RANGE = (-51, 51)  # Optimization range
 XY_INTERVAL = 5  # Optimization interval
 MAX_POINTS_INSIDE_CONTOUR = 23  # Breaks if higher than this number
+SURROUNDING_RADIUS = -70
 
 
 def generate_grid(contour, T):
@@ -158,10 +159,9 @@ def optimize_grid_angle(contour, T):
         indices, grid_points_inside_contour = zip(
             *indices_and_points_inside_contour) if indices_and_points_inside_contour else ([], [])
 
-        radius_around = -100
         indices_and_points_around_contour = [(index, point) for index, point in enumerate(rotated_points)
                                              if cv2.pointPolygonTest(contour, tuple(map(int, point)),
-                                                                     True) >= radius_around]
+                                                                     True) >= SURROUNDING_RADIUS]
         indices_around, grid_points_around = zip(
             *indices_and_points_around_contour) if indices_and_points_around_contour else ([], [])
 
