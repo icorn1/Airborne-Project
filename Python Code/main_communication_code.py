@@ -14,6 +14,8 @@ import os
 import cv2
 
 # Variables
+DROPOFF_X = -.475
+DROPOFF_Y = -.317
 MASKING_THRESHOLD = 160
 INVERT_MASK = 0
 MINIMUM_CONTOUR_AREA = 10000
@@ -71,22 +73,21 @@ def perform_calibration():
               'DistortionMatrix.npz', (4, 4))
 
 
-def send_ply_information(j=0):
+def send_ply_information(placed_plies=0):
     mtx_data = np.load('calibration_matrices/IntrinsicMatrix.npz')
     mtx = mtx_data['arr_0'].astype(np.float64)
     dst_data = np.load('calibration_matrices/DistortionMatrix.npz')
     dst = dst_data['arr_0'].astype(np.float64)
     T_data = np.load('calibration_matrices/Translation.npz')
     T = T_data['arr_0']
-    for i, ply in enumerate(laminate.ply_ids[j:]):
-        # Error codes and their meaning:x
+    for ply in laminate.ply_ids[placed_plies:]:
+        # Error codes and their meanings:
         # 0 = there is no problem, the ply is found.
         # 1 = the laminate is finished
         # 2 = Wrong ply
         # 3 = No contours are found in the image
-        i = j
         error_code = 0
-        
+
         image = get_genie_image()
         image = undistort_image(image, dst, mtx)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -95,18 +96,17 @@ def send_ply_information(j=0):
         contours = [contour for contour in contours if cv2.contourArea(contour) > MINIMUM_CONTOUR_AREA]
         model_contour = load_contour(f"contours/{ply}_mesh_contour.txt")
 
-        
         if len(contours) == 0:
             x, y, rotation, angle, cup_array = 0, 0, 0, 0, []
             error_code = 3
         else:
-            index, angle, ret = find_best_match(contours, model_contour, image, show_plot=True)
+            index, angle, ret = find_best_match(contours, model_contour, image, show_plot=False)
             if not ret:
                 x, y, rotation, angle, cup_array = 0, 0, 0, 0, []
                 error_code = 2
             else:
                 x, y, rotation, cup_array = get_ply_information(contours[index], T, show_plot=False)
-        
+
         # cv2.drawContours(image, contours, -1, (0, 255, 255), 3)
         # pic = cv2.resize(image, (1080, 858))
         #
@@ -114,19 +114,14 @@ def send_ply_information(j=0):
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
-        coordinates = laminate.coordinates[i]
-        ply_angle = laminate.angles[i]
+        coordinates = laminate.coordinates[placed_plies]
+        ply_angle = laminate.angles[placed_plies]
         robot_translation = np.array([coordinates[0] * T[0, 0],
                                       coordinates[1] * T[1, 0]]) / 1000
 
-        print(coordinates)
-
-        # some random location for the composite to be.
-        print(robot_translation)
-        xc = -0.475 - robot_translation[1]
-        yc = -.317 - robot_translation[0]
-        print(f"Angle ply: {angle * 180 / np.pi}; Angle grid: {rotation} Final Angle: {ply_angle}, Total angle: {-rotation + (ply_angle - (angle * 180 / np.pi))}")
-
+        xc = DROPOFF_X - robot_translation[1]
+        yc = DROPOFF_Y - robot_translation[0]
+        
         rz = -rotation / 180 * np.pi
         rzc = (-rotation + (ply_angle - (angle * 180 / np.pi))) / 180 * np.pi
         if rzc > np.pi:
@@ -160,27 +155,26 @@ def send_ply_information(j=0):
             Error = client_socket.recv(1024).decode()
             if Error == '3':
                 print("UR: pickup succesful")
-                j += 1
+                placed_plies += 1
 
             if Error == '4':
                 print("UR: Failed pickup")
                 activation_code = client_socket.recv(1024).decode()
-                print("UR:", activation_code, "\n") 
-                j = i 
-                send_ply_information(j)
+                print("UR:", activation_code, "\n")
+                send_ply_information(placed_plies)
                 break
+                
         elif error_code == 2:
             print("PC: Wrong ply")
             activation_code = client_socket.recv(1024).decode()
-            print("UR:", activation_code, "\n") 
-            j = i 
-            send_ply_information(j)
+            print("UR:", activation_code, "\n")
+            send_ply_information(placed_plies)
+            
         elif error_code == 3:
             print("PC: No plies found")
             activation_code = client_socket.recv(1024).decode()
-            print("UR:", activation_code, "\n") 
-            j = i 
-            send_ply_information(j)
+            print("UR:", activation_code, "\n")
+            send_ply_information(placed_plies)
 
     # If the for loop ends, the laminate is finished.  
     print("PC: Sending error_code 1 (Laminate finished)")
