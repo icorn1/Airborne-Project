@@ -1,5 +1,6 @@
 import pickle
 import numpy as np
+import os
 
 
 class LaminateStorage:
@@ -47,17 +48,20 @@ class LaminateStorage:
 
 
 if __name__ == '__main__':
-    # Example usage:
+    directory = 'laminates'
+    filename = 1
     data_storage = LaminateStorage()
     data_storage.add_ply_id(6, 2, 8)
     data_storage.add_coordinate((1348, 811), (1485, 850), (1525, 840))
     data_storage.add_angle(2.7, -35.4, -45.8)
     data_storage.normalize_coordinates()
     data_storage.normalize_angles()
-    data_storage.save_as_pickle("laminates/1.pickle")
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+    data_storage.save_as_pickle(f"{directory}/{filename}.pickle")
 
     # Loading data from pickle file
-    loaded_data_storage = LaminateStorage.load_from_pickle("laminates/1.pickle")
+    loaded_data_storage = LaminateStorage.load_from_pickle(f"{directory}/{filename}.pickle")
     print("Loaded ply_ids:", loaded_data_storage.ply_ids)
     print("Loaded coordinates:", loaded_data_storage.coordinates[:])
     print("Angles", loaded_data_storage.angles)
