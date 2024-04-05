@@ -96,12 +96,12 @@ def send_ply_information(j=0):
 
         
         if len(contours) == 0:
-            x, y, rotation, cup_array, angle = 0, 0, 0, 0, []
+            x, y, rotation, angle, cup_array = 0, 0, 0, 0, []
             error_code = 3
         else:
             index, angle, ret = find_best_match(contours, model_contour, image, show_plot=False)
             if not ret:
-                x, y, rotation, cup_array, angle = 0, 0, 0, 0, []
+                x, y, rotation, angle, cup_array = 0, 0, 0, 0, []
                 error_code = 2
             else:
                 x, y, rotation, cup_array = get_ply_information(contours[index], T, show_plot=False)
