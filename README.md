@@ -102,11 +102,21 @@ This code is written in urscript and runs on the UR. This code turns off all of 
 	URCaps code is based on Java, with Swing for the application in this case. This way we can create custom installation and program modules for UR cobots that do exactly what we want, and they can also act as a GUI.
  What our URCap does exactly (demonstration) is provide a GUI and a simple integration for a Cobot to a laptop, to perform the logic of the robot. For it to be automated, the first step is to press the big green button "START". 
 
-Contents of the GUI:
+## Contents of the GUI:
 - Company (Airborne) logo + student credits.
 - Big green button to start the program.
 - Settings boxes to select wheter user wants to do calibration or run a certain laminate.
 - Corresponding laminate image.
 
+## How to compile and install the URCap
+You'll need a Linux based enviornment, with maven installed. Then, enter the URCaps Code folder, and from there run "mvn install -Premote" if you want to install it on to the robot, or "mvn install -P ursimvm" if you plan to do it on the URSimulator. <b>Keep in mind, you might need to adjust the IP addresses on the POM file! </b> You can find the full list of dependencies on the development guide below.
+
+I strongly suggest to check the development guide for URCaps if you want to develop your own URCap.
+Development guide:
+https://plus.universal-robots.com/media/1810567/urcap_tutorial_swing.pdf
+Style guide:
+https://www.universal-robots.com/media/1802558/urcaps_style_guide-v10.pdf
+
+## Credits
 This URCap uses source code from another URCap, credits to https://github.com/BomMadsen/URCap-ScriptCommunicator.
 </details>
