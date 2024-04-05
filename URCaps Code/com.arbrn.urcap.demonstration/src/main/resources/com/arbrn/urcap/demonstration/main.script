@@ -118,7 +118,7 @@ def Initialise():
          # There is a ply attached
          if sensor < 0.1:
            movej(START_LOC)
-           movel(com_loc)
+           movej(com_loc)
            movej(pose_trans(get_actual_tcp_pose(), p[0, 0, 0, 0, 0, data[6]]))
            movel(pose_trans(get_actual_tcp_pose(), p[0, 0, .120, 0, 0, 0]))            
            socket_send_string("Deactivate")
