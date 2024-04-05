@@ -79,33 +79,46 @@ def send_ply_information(j=0):
     T_data = np.load('calibration_matrices/Translation.npz')
     T = T_data['arr_0']
     for i, ply in enumerate(laminate.ply_ids[j:]):
+        # Error codes and their meaning:x
+        # 0 = there is no problem, the ply is found.
+        # 1 = the laminate is finished
+        # 2 = Wrong ply
+        # 3 = No contours are found in the image
+        error_code = 0
+        
         image = get_genie_image()
         image = undistort_image(image, dst, mtx)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         _, mask = cv2.threshold(gray, MASKING_THRESHOLD, 255, INVERT_MASK)
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
         contours = [contour for contour in contours if cv2.contourArea(contour) > MINIMUM_CONTOUR_AREA]
-        cv2.drawContours(image, contours, -1, (0, 255, 255), 3)
+        model_contour = load_contour(f"contours/{ply}_mesh_contour.txt")
+
+        
+        if len(contours) == 0:
+            x, y, rotation, cup_array, angle = 0, 0, 0, 0, []
+            error_code = 3
+        else:
+            index, angle, ret = find_best_match(contours, model_contour, image, show_plot=False)
+            if not ret:
+                x, y, rotation, cup_array, angle = 0, 0, 0, 0, []
+                error_code = 2
+            else:
+                x, y, rotation, cup_array = get_ply_information(contours[index], T, show_plot=False)
+        
+        # cv2.drawContours(image, contours, -1, (0, 255, 255), 3)
         # pic = cv2.resize(image, (1080, 858))
         #
         # cv2.imshow('img', pic)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
-        model_contour = load_contour(f"contours/{ply}_mesh_contour.txt")
-
-        index, angle = find_best_match(contours, model_contour, image, show_plot=False)
-        x, y, rotation, cup_array = get_ply_information(contours[index], T, show_plot=False)
-        translation = [0, 0]
-
         coordinates = laminate.coordinates[i]
         ply_angle = laminate.angles[i]
-        robot_translation = np.array([(translation[0] + coordinates[0]) * T[0, 0],
-                                      (translation[1] + coordinates[1]) * T[1, 0]]) / 1000
-        # robot_translation = np.array([(translation[0]) * T[0, 0],
-        #                               (translation[1]) * T[1, 0]]) / 1000
+        robot_translation = np.array([coordinates[0] * T[0, 0],
+                                      coordinates[1] * T[1, 0]]) / 1000
 
-        print(translation, coordinates)
+        print(coordinates)
 
         # some random location for the composite to be.
         print(robot_translation)
@@ -113,10 +126,6 @@ def send_ply_information(j=0):
         yc = -.317 - robot_translation[0]
         print(f"Angle ply: {angle * 180 / np.pi}; Angle grid: {rotation} Final Angle: {ply_angle}, Total angle: {-rotation + (ply_angle - (angle * 180 / np.pi))}")
 
-        # Error codes and their meaning:x
-        # 0 = there is no problem, the ply is found.
-        # 1 = there is a problem, the ply is not found.
-        # 2 = the laminate is finished and the robot needs to know.
         rz = -rotation / 180 * np.pi
         rzc = (-rotation + (ply_angle - (angle * 180 / np.pi))) / 180 * np.pi
         if rzc > np.pi:
@@ -125,7 +134,6 @@ def send_ply_information(j=0):
             rzc += np.pi * 2
 
         print("PC: Sending error_code")
-        error_code = 0
         client_socket.send(format_nums(([error_code])).encode())
 
         if error_code == 0:
