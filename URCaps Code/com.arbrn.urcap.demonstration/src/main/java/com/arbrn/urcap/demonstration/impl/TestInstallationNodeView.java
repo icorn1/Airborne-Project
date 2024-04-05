@@ -39,9 +39,9 @@ public class TestInstallationNodeView implements SwingInstallationNodeView<TestI
     }
 
     private enum Laminate {
-        Mountains("1", "Mountains", "/com/arbrn/urcap/demonstration/Mountains.png"),
-        Angrenost("2", "Angrenost", "/com/arbrn/urcap/demonstration/Angrenost.png"),
-        Picasso("3", "Picasso", "/com/arbrn/urcap/demonstration/Picasso.png");
+        Mountains("1", "Mountains", "/com/arbrn/urcap/demonstration/Moun.png"),
+        Angrenost("2", "Angrenost", "/com/arbrn/urcap/demonstration/Angr.png"),
+        Picasso("3", "Picasso", "/com/arbrn/urcap/demonstration/Pic.png");
 
         private final String id;
         private final String displayName;

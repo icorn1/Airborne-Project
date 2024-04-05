@@ -7,7 +7,7 @@
 
 	<groupId>com.arbrn.urcap</groupId>
 	<artifactId>demonstration</artifactId>
-	<version>1.1.2</version>
+	<version>1.1.0</version>
 	<name>Demonstration</name>
 	<packaging>bundle</packaging>
  

@@ -78,6 +78,7 @@ def send_ply_information():
     dst = dst_data['arr_0'].astype(np.float64)
     T_data = np.load('calibration_matrices/Translation.npz')
     T = T_data['arr_0']
+    pickedup_plies = 0
     for i, ply in enumerate(laminate.ply_ids):
         image = get_genie_image()
         image = undistort_image(image, dst, mtx)
@@ -125,7 +126,10 @@ def send_ply_information():
             rzc += np.pi * 2
 
         print("PC: Sending error_code")
-        error_code = 0
+        if (pickedup_plies >= len(laminate.ply_ids)):
+            error_code = 1
+        else:
+            error_code = 0
         client_socket.send(format_nums(([error_code])).encode())
 
         if error_code == 0:
@@ -151,11 +155,13 @@ def send_ply_information():
             Error = client_socket.recv(1024).decode()
             if Error == 3:
                 print("UR: pickup succesful")
+                pickedup_plies += 1
+
             if Error == 4:
                 print("UR: Failed pickup")
 
         if error_code == 1:
-            print("PC: error_code: 1 \n \n")
+            print("PC: error_code: 1 (Laminate finished) \n \n")
 
 
 """
