@@ -1,6 +1,6 @@
 from machine_vision_functions import get_ply_information
 from calibrate import calibrate, undistort_image
-from compare_contours import find_best_match
+from contour_comparer import find_best_match
 from PLC_communication import write_values
 from laminate_data import LaminateStorage
 from harvesters.core import Harvester
@@ -79,14 +79,14 @@ def send_ply_information(j=0):
     T_data = np.load('calibration_matrices/Translation.npz')
     T = T_data['arr_0']
     for i, ply in enumerate(laminate.ply_ids[j:]):
-        i = j
         # Error codes and their meaning:x
         # 0 = there is no problem, the ply is found.
         # 1 = the laminate is finished
         # 2 = Wrong ply
         # 3 = No contours are found in the image
         error_code = 0
-        
+        i = j
+
         image = get_genie_image()
         image = undistort_image(image, dst, mtx)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -100,7 +100,7 @@ def send_ply_information(j=0):
             x, y, rotation, angle, cup_array = 0, 0, 0, 0, []
             error_code = 3
         else:
-            index, angle, ret = find_best_match(contours, model_contour, image, show_plot=False)
+            index, angle, ret = find_best_match(contours, model_contour, image, show_plot=True)
             if not ret:
                 x, y, rotation, angle, cup_array = 0, 0, 0, 0, []
                 error_code = 2
@@ -158,11 +158,14 @@ def send_ply_information(j=0):
             write_values(plc, cup_array, 0)
 
             Error = client_socket.recv(1024).decode()
-            if Error == 3:
+            if Error == '3':
                 print("UR: pickup succesful")
+                j += 1
 
-            if Error == 4:
+            if Error == '4':
                 print("UR: Failed pickup")
+                activation_code = client_socket.recv(1024).decode()
+                print("UR:", activation_code, "\n") 
                 j = i 
                 send_ply_information(j)
                 break
