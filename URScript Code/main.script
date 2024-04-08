@@ -109,8 +109,9 @@ def Initialise():
 
          movej(ply_loc)
          movej(pose_trans(ply_loc, p[0, 0, 0, 0, 0, data[3]]))
+         socket_send_string("activate unused")
          movel(pose_trans(get_actual_tcp_pose(), MOVE_DOWN))
-         socket_send_string("activate")
+         socket_send_string("activate used")
          sleep(0.3)
          movel(pose_trans(get_actual_tcp_pose(), MOVE_UP))
          sensor = get_standard_analog_in(1)
