@@ -121,6 +121,7 @@ def Initialise():
          if sensor < 0.1:
            if data[7] == 1:
              movej(SAFETY_POS)
+           end
            movej(START_LOC)
            movej(com_loc)
            movej(pose_trans(get_actual_tcp_pose(), p[0, 0, 0, 0, 0, data[6]]))
