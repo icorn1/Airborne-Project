@@ -14,7 +14,8 @@ import os
 import cv2
 
 # Variables
-DROPOFF_X = -.475
+NUMBER_OF_VACUUM_CUPS = 24
+DROPOFF_X = -.480
 DROPOFF_Y = -.317
 MASKING_THRESHOLD = 160
 INVERT_MASK = 0
@@ -75,7 +76,7 @@ def perform_calibration():
               'DistortionMatrix.npz', (4, 4))
 
 
-def send_ply_information(placed_plies=0):
+def send_ply_information(placed_plies=1):
     mtx_data = np.load('calibration_matrices/IntrinsicMatrix.npz')
     mtx = mtx_data['arr_0'].astype(np.float64)
     dst_data = np.load('calibration_matrices/DistortionMatrix.npz')
@@ -99,15 +100,19 @@ def send_ply_information(placed_plies=0):
         model_contour = load_contour(f"contours/{ply}_mesh_contour.txt")
 
         if len(contours) == 0:
-            x, y, rotation, angle, cup_array = 0, 0, 0, 0, []
+            x, y, rotation, angle, cup_array_surrounding, cup_array = 0, 0, 0, 0, [], []
             error_code = 3
         else:
             index, angle, ret = find_best_match(contours, model_contour, image, show_plot=False)
             if not ret:
-                x, y, rotation, angle, cup_array = 0, 0, 0, 0, []
+                x, y, rotation, angle, cup_array_surrounding, cup_array = 0, 0, 0, 0, [], []
                 error_code = 2
             else:
-                x, y, rotation, cup_array = get_ply_information(contours[index], T, show_plot=False)
+                x, y, rotation, cup_array_surrounding, cup_array = get_ply_information(contours[index], T, show_plot=False)
+
+        print(cup_array_surrounding)
+        print(cup_array)
+        cup_array_unused = [cup for cup in cup_array_surrounding if cup not in cup_array]
 
         # cv2.drawContours(image, contours, -1, (0, 255, 255), 3)
         # pic = cv2.resize(image, (1080, 858))
@@ -124,14 +129,14 @@ def send_ply_information(placed_plies=0):
         xc = DROPOFF_X - robot_translation[1]
         yc = DROPOFF_Y - robot_translation[0]
 
-        rz = -rotation / 180 * np.pi
-        rzc = (-rotation + (ply_angle - (angle * 180 / np.pi))) / 180 * np.pi
+        rz = rotation / 180 * np.pi
+        rzc = (rotation + (ply_angle - (angle * 180 / np.pi))) / 180 * np.pi
         if rzc > np.pi:
             rzc -= np.pi * 2
         elif rzc < -np.pi:
             rzc += np.pi * 2
 
-        print("PC: Sending error_code")
+        print("PC: Sending error_code", error_code)
         client_socket.send(format_nums(([error_code])).encode())
 
         if error_code == 0:
@@ -145,14 +150,21 @@ def send_ply_information(placed_plies=0):
 
             activation_code = client_socket.recv(1024).decode()
             print("UR:", activation_code, "vacuum cups \n")
-            print("PC: activating vacuüm cups:", cup_array, "\n \n")
+            print("PC: activating unused vacuüm cups:", cup_array_unused, "\n")
 
-            write_values(plc, cup_array, 1)
+            write_values(plc, cup_array_unused, 1)
 
             activation_code = client_socket.recv(1024).decode()
             print("UR:", activation_code, "vacuum cups \n")
-            print("PC: Deactivate vacuüm cups:", cup_array, "\n \n")
-            write_values(plc, cup_array, 0)
+            print("PC: activating used vacuüm cups:", cup_array, "\n")
+
+            write_values(plc, cup_array, 1)
+
+            all_vacuum_cups = list(range(0, NUMBER_OF_VACUUM_CUPS))
+            activation_code = client_socket.recv(1024).decode()
+            print("UR:", activation_code, "vacuum cups \n")
+            print("PC: Deactivate vacuüm cups:", all_vacuum_cups, "\n")
+            write_values(plc, all_vacuum_cups, 0)
 
             Error = client_socket.recv(1024).decode()
             if Error == '3':
@@ -202,25 +214,27 @@ if __name__ == '__main__':
         accept signal,
         ... update this code ...
     """
+    try:
+        while True:
+            server_socket.listen(5)
+            print("PC: Waiting for client connection...")
+            client_socket, address = server_socket.accept()
+            print("PC: Connected \n")
+            task = client_socket.recv(1024).decode()
 
-    while True:
-        server_socket.listen(5)
-        print("PC: Waiting for client connection...")
-        client_socket, address = server_socket.accept()
-        print("PC: Connected \n")
-        task = client_socket.recv(1024).decode()
+            if task == "calibration":
+                print("UR: start calibration")
+                perform_calibration()
 
-        if task == "calibration":
-            print("UR: start calibration")
-            perform_calibration()
+            elif task == "moving":
+                print("UR: start moving ply's")
+                Laminate_ID = client_socket.recv(1024).decode()
+                laminate = LaminateStorage.load_from_pickle(f"laminates/{Laminate_ID}.pickle")
 
-        elif task == "moving":
-            print("UR: start moving ply's")
-            Laminate_ID = client_socket.recv(1024).decode()
-            laminate = LaminateStorage.load_from_pickle(f"laminates/{Laminate_ID}.pickle")
-
-            # used when running send_ply_information2test()
-            print("UR: Laminate ID is ", Laminate_ID, "\n")
-            send_ply_information()
-        else:
-            print(task)
+                # used when running send_ply_information2test()
+                print("UR: Laminate ID is ", Laminate_ID, "\n")
+                send_ply_information()
+            else:
+                print(task)
+    except ConnectionResetError:
+        print("Connection lost with UR")
