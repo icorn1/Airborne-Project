@@ -17,8 +17,9 @@ def Initialise():
   set_standard_digital_out(7, True)
  
   global START_LOC = p[-0.100, -0.450, 0.300, 0, 3.14, 0]  
-  global MOVE_DOWN = p[0,0,0.130,0,0,0]
-  global MOVE_UP   = p[0,0,-0.130,0,0,0]
+  global SAFETY_POS = p[0.485, -0.270, 0.300, 0, 3.14, 0]
+  global MOVE_DOWN = p[0,0,0.120,0,0,0]
+  global MOVE_UP   = p[0,0,-0.120,0,0,0]
   global IP_HOST = "192.168.0.11"
   global PORT = 50001
   global PLY_ID = 3
@@ -102,21 +103,25 @@ def Initialise():
        response_code = socket_read_ascii_float(1, "socket_0", 20)
  
        if response_code[1] == 0:
-         data  = socket_read_ascii_float(6, "socket_0", 20)
+         data  = socket_read_ascii_float(7, "socket_0", 20)
  
          ply_loc  = p[data[1], data[2], Z_HEIGHT, 0, 3.14, 0]               
          com_loc  = p[data[4], data[5], Z_HEIGHT, 0, 3.14, 0]   
 
          movej(ply_loc)
          movej(pose_trans(ply_loc, p[0, 0, 0, 0, 0, data[3]]))
+         socket_send_string("activate unused")
          movel(pose_trans(get_actual_tcp_pose(), MOVE_DOWN))
-         socket_send_string("activate")
+         socket_send_string("activate used")
          sleep(0.3)
          movel(pose_trans(get_actual_tcp_pose(), MOVE_UP))
          sensor = get_standard_analog_in(1)
  
          # There is a ply attached
          if sensor < 0.1:
+           if data[7] == 1:
+             movej(SAFETY_POS)
+           end
            movej(START_LOC)
            movej(com_loc)
            movej(pose_trans(get_actual_tcp_pose(), p[0, 0, 0, 0, 0, data[6]]))

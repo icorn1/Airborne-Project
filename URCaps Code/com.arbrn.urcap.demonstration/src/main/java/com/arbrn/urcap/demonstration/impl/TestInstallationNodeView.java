@@ -129,24 +129,32 @@ public class TestInstallationNodeView implements SwingInstallationNodeView<TestI
         labelText.setFont(new Font("Arial", Font.PLAIN, 20)); // Increase font size
         box.add(labelText);
 
-        JButton button = new JButton("START");
-        button.addActionListener(new ActionListener() {
+        final JButton startButton = new JButton("START");
+        startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Here we send to the contribution the options for the script
                 contribution.sendScriptTest(ACTION_TYPE.getId(), SELECTED_LAMINATE.getId());
+                startButton.setEnabled(false);
+                
+                try {
+                    Thread.sleep(4000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                startButton.setEnabled(true);
             }
         });
-        button.setBackground(new Color(24, 196, 12));
-        button.setForeground(Color.WHITE);
+        startButton.setBackground(new Color(24, 196, 12));
+        startButton.setForeground(Color.WHITE);
         Dimension buttonSize = new Dimension(250, 70); 
-        button.setMaximumSize(buttonSize);
-        button.setMinimumSize(buttonSize);
-        button.setPreferredSize(buttonSize);
-        button.setAlignmentX(Component.CENTER_ALIGNMENT); // Center the button horizontally
-        button.setFont(new Font("Arial", Font.BOLD, 30)); // Increase button font size
+        startButton.setMaximumSize(buttonSize);
+        startButton.setMinimumSize(buttonSize);
+        startButton.setPreferredSize(buttonSize);
+        startButton.setAlignmentX(Component.CENTER_ALIGNMENT); // Center the button horizontally
+        startButton.setFont(new Font("Arial", Font.BOLD, 30)); // Increase button font size
         box.add(createSpacer(20)); // Add space between text and button
-        box.add(button);
+        box.add(startButton);
 
         return box;
     }
