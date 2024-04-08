@@ -75,7 +75,8 @@ This file is used for storing the function for communicating to the PLC.
       <br />
       <details><summary><i>main.script</i></summary>
   
-This code is written in urscript and runs on the UR. This code handles all the logic on the robot. This script contains a function for the initialisation of the robot that turns all the digital outputs on and gets the analog output on the right value.
+This code is written in urscript and runs on the UR. This code handles all the logic on the robot. This script contains a function called Initialise() for the initialisation of the robot that turns all the digital outputs on and gets the analog output on the right value and a function called De_initialise() to turn all the digital ports off. 
+The function calibrate() is used to preform an automatic calibration. The robot lets the laptop know that it wants to start calibration, the laptop sends the right poses to the robot. The robot moves to the pose and the laptop takes a picture using the camera (for this the genie nano is used). This is done for as many poses as needed. Then when the calibration is finished all the logic on the laptop calculates the calibration.
 
 > This code is not completed yet and will be updated until the end of the project
 ---
