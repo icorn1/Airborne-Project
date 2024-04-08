@@ -103,7 +103,7 @@ def Initialise():
        response_code = socket_read_ascii_float(1, "socket_0", 20)
  
        if response_code[1] == 0:
-         data  = socket_read_ascii_float(6, "socket_0", 20)
+         data  = socket_read_ascii_float(7, "socket_0", 20)
  
          ply_loc  = p[data[1], data[2], Z_HEIGHT, 0, 3.14, 0]               
          com_loc  = p[data[4], data[5], Z_HEIGHT, 0, 3.14, 0]   
@@ -119,6 +119,8 @@ def Initialise():
  
          # There is a ply attached
          if sensor < 0.1:
+           if data[7] == 1:
+             movej(SAFETY_POS)
            movej(START_LOC)
            movej(com_loc)
            movej(pose_trans(get_actual_tcp_pose(), p[0, 0, 0, 0, 0, data[6]]))
