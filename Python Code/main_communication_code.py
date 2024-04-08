@@ -1,6 +1,8 @@
 from machine_vision_functions import get_ply_information
+from create_working_space import create_working_region
 from calibrate import calibrate, undistort_image
 from contour_comparer import find_best_match
+from shapely.geometry import Point
 from PLC_communication import write_values
 from laminate_data import LaminateStorage
 from harvesters.core import Harvester
@@ -85,10 +87,11 @@ def send_ply_information(placed_plies=0):
     T = T_data['arr_0']
     for ply in laminate.ply_ids[placed_plies:]:
         # Error codes and their meanings:
-        # 0 = there is no problem, the ply is found.
-        # 1 = the laminate is finished
+        # 0 = There is no problem, the ply is found.
+        # 1 = The laminate is finished
         # 2 = Wrong ply
         # 3 = No contours are found in the image
+        # 4 = Ply outside of working region
         error_code = 0
 
         image = get_genie_image()
@@ -98,20 +101,24 @@ def send_ply_information(placed_plies=0):
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
         contours = [contour for contour in contours if cv2.contourArea(contour) > MINIMUM_CONTOUR_AREA]
         model_contour = load_contour(f"contours/{ply}_mesh_contour.txt")
+        working_space = create_working_region()
 
         if len(contours) == 0:
             x, y, rotation, angle, cup_array_surrounding, cup_array = 0, 0, 0, 0, [], []
             error_code = 3
         else:
-            index, angle, ret = find_best_match(contours, model_contour, image, show_plot=False)
+            index, angle, ret = find_best_match(contours, model_contour, image, show_plot=True)
             if not ret:
                 x, y, rotation, angle, cup_array_surrounding, cup_array = 0, 0, 0, 0, [], []
                 error_code = 2
             else:
                 x, y, rotation, cup_array_surrounding, cup_array = get_ply_information(contours[index], T, show_plot=False)
+                point = Point(y * 1000, x * 1000)
+                print(y * 1000, x * 1000)
+                inside = point.within(working_space)
+                if not inside:
+                    error_code = 4
 
-        print(cup_array_surrounding)
-        print(cup_array)
         cup_array_unused = [cup for cup in cup_array_surrounding if cup not in cup_array]
 
         # cv2.drawContours(image, contours, -1, (0, 255, 255), 3)
@@ -187,6 +194,12 @@ def send_ply_information(placed_plies=0):
 
         elif error_code == 3:
             print("PC: No plies found")
+            activation_code = client_socket.recv(1024).decode()
+            print("UR:", activation_code, "\n")
+            send_ply_information(placed_plies)
+
+        elif error_code == 4:
+            print("PC: Ply outside of working region")
             activation_code = client_socket.recv(1024).decode()
             print("UR:", activation_code, "\n")
             send_ply_information(placed_plies)
