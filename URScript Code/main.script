@@ -17,6 +17,7 @@ def Initialise():
   set_standard_digital_out(7, True)
  
   global START_LOC = p[-0.100, -0.450, 0.300, 0, 3.14, 0]  
+  global SAFETY_POS = p[0.485, -0.270, 0.300, 0, 3.14, 0]
   global MOVE_DOWN = p[0,0,0.120,0,0,0]
   global MOVE_UP   = p[0,0,-0.120,0,0,0]
   global IP_HOST = "192.168.0.11"
