@@ -36,8 +36,8 @@ def generate_grid(contour, T):
     grid_points = []
     index = 1  # Starting index
 
-    for j in range(grid_cols, 0, -1):
-        for i in range(0, grid_rows, 1):
+    for j in range(0, grid_cols, 1):
+        for i in range(grid_rows, 0, -1):
             x = i * x_spacing
             y = j * y_spacing
             grid_points.append((x, y, index))
@@ -135,8 +135,8 @@ def optimize_grid_angle(contour, T):
     # Initialize variables to store the optimal rotation
     optimal_rotation_angle = 0
     max_points_inside_contour = 0
-    optimal_grid_points_inside_contour = []
-    optimal_indices = []
+    inside_grid_points = []
+    inside_indices = []
     surrounding_indices = []
     surrounding_grid_points = []
 
@@ -153,10 +153,11 @@ def optimize_grid_angle(contour, T):
         points_inside_contour = np.sum(np.array(
             [cv2.pointPolygonTest(contour, tuple(map(int, point)), True) >= radius for point in
              rotated_points]))
+
         indices_and_points_inside_contour = [(index, point) for index, point in enumerate(rotated_points)
                                              if cv2.pointPolygonTest(contour, tuple(map(int, point)),
                                                                      True) >= radius]
-        indices, grid_points_inside_contour = zip(
+        indices_inside, grid_points_inside = zip(
             *indices_and_points_inside_contour) if indices_and_points_inside_contour else ([], [])
 
         indices_and_points_around_contour = [(index, point) for index, point in enumerate(rotated_points)
@@ -169,8 +170,8 @@ def optimize_grid_angle(contour, T):
         if points_inside_contour > max_points_inside_contour:
             max_points_inside_contour = points_inside_contour
             optimal_rotation_angle = theta * 180 / np.pi
-            optimal_grid_points_inside_contour = grid_points_inside_contour
-            optimal_indices = indices
+            inside_indices = indices_inside
+            inside_grid_points = grid_points_inside
             surrounding_indices = indices_around
             surrounding_grid_points = grid_points_around
 
@@ -178,7 +179,7 @@ def optimize_grid_angle(contour, T):
             if max_points_inside_contour > MAX_POINTS_INSIDE_CONTOUR:
                 break
     return max_points_inside_contour, optimal_rotation_angle, grid_points, surrounding_grid_points, \
-           surrounding_indices
+           surrounding_indices, inside_grid_points, inside_indices
 
 
 def rotate_grid_points(grid_points, contour, theta):
@@ -211,7 +212,7 @@ def rotate_grid_points(grid_points, contour, theta):
 
 
 def get_ply_information(contour, T, show_plot=False):
-    n, optimal_rotation_angle, grid_points, grid_points_inside_contour, optimal_indices = \
+    n, optimal_rotation_angle, grid_points, surrounding_grid_points, surrounding_indices, inside_grid_points, inside_indices = \
         optimize_grid_angle(contour, T)
 
     # translated_grid_points = grid_points[:, 0:2] + optimal_translation_vector
@@ -228,9 +229,6 @@ def get_ply_information(contour, T, show_plot=False):
     grid_center_x = np.mean(grid_points[:, 0])
     grid_center_y = np.mean(grid_points[:, 1])
 
-    print(f"Contour: {centroid_x, centroid_y}\n"
-          f"Grid: {grid_center_x, grid_center_y}")
-
     pose_y = grid_center_x * T[0, 0] + T[0, 1]
     pose_x = -(grid_center_y * T[1, 0] + T[1, 1])  # Negate the y-coordinate
     robot_pose = np.array([pose_x, pose_y]) / 1000
@@ -238,26 +236,31 @@ def get_ply_information(contour, T, show_plot=False):
         print(f"Number of ponts: {n}\n"
               f"Angle: {optimal_rotation_angle}, (x, y) : ({grid_center_x}, {grid_center_y})\n"
               f"Corrected robot info: (x, y, z, Rx, Ry, Rz): {(robot_pose[0], robot_pose[1], 10, 0, 0, optimal_rotation_angle / 180 * np.pi)}\n"
-              f"Vacuum cups: {optimal_indices}")
+              f"Vacuum cups: {surrounding_indices}")
 
         image = np.ones((IMAGE_SIZE[0], IMAGE_SIZE[1], 3), dtype=np.uint8) * 0
         cv2.drawContours(image, [contour], -1, (0, 0, 255), thickness=cv2.FILLED)
-        rotation_matrix = cv2.getRotationMatrix2D((grid_center_x, grid_center_y), optimal_rotation_angle, 1)
-        final_rotated_grid_points = cv2.transform(np.array([grid_points]), rotation_matrix)[0]
-
+        final_rotated_grid_points = rotate_grid_points(grid_points, contour, optimal_rotation_angle / 180 * np.pi)
         radius = abs(int(VACUUM_CUP_RADIUS / T[0, 0]))
+        cup_array_unused = [cup for cup in surrounding_indices if cup not in inside_indices]
+        print(cup_array_unused)
 
         for point in final_rotated_grid_points:
             cv2.circle(image, tuple(map(int, point)), 2, (255, 0, 0), -1)
-        for i in range(len(grid_points_inside_contour)):
-            point = grid_points_inside_contour[i]
-            index = optimal_indices[i]
+        for i in range(len(surrounding_grid_points)):
+            point = surrounding_grid_points[i]
+            index = surrounding_indices[i]
             cv2.circle(image, tuple(map(int, point)), radius, (0, 255, 0), -1)
-            cv2.putText(image, str(index), tuple(map(int, point)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(image, str(index), tuple(map(int, point)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+        for i in range(len(inside_grid_points)):
+            point = inside_grid_points[i]
+            index = inside_indices[i]
+            cv2.circle(image, tuple(map(int, point)), radius, (0, 255, 255), -1)
+            cv2.putText(image, str(index), tuple(map(int, point)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
         cv2.circle(image, (int(grid_center_x), int(grid_center_y)), 10, (255, 255, 255), -1)
         pic = cv2.resize(image, (1080, 853))
         cv2.imshow('Optimal Position, Rotation, and Grid Points Inside Contour', pic)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    return robot_pose[0], robot_pose[1], optimal_rotation_angle, optimal_indices
+    return robot_pose[0], robot_pose[1], optimal_rotation_angle, surrounding_indices, inside_indices
