@@ -147,9 +147,12 @@ def send_ply_information(placed_plies=0):
         client_socket.send(format_nums(([error_code])).encode())
 
         if error_code == 0:
+            safety_code = 0
+            if y > -.260:
+                safety_code = 1
             print("PC: sending: x:", x, "| y:", y, "| Rz:", rz,
                   "| xc:", xc, "| yc:", yc, "| Rzc:", rzc)
-            client_socket.send(format_nums((x, y, rz, xc, yc, rzc)).encode())
+            client_socket.send(format_nums((x, y, rz, xc, yc, rzc, safety_code)).encode())
 
             plc = snap7.client.Client()  # connecting to the PLC while the robot moves to ply
             plc.connect('192.168.0.1', 0, 1, 102)  # IP address, rack, slot (from HW settings)
