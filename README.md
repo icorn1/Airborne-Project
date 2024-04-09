@@ -150,16 +150,29 @@ Ixent, can you write this?
 
 </details>
 <br />
-<details><summary><b>brightness threshold for ply detection</b></summary>
+<details><summary><b>ply detection</b></summary>
+	</details>
+	<br />
+	<details><summary><b>brightness threshold for ply detection</b></summary>
 location variable:
+	
 file:
+	
 line:
 
 discription.
-
-
-	
 </details>
+</details>
+<br />
+<details><summary><b>brightness threshold for ply detection</b></summary>
+location variable:
+	
+file:
+	
+line:
 
+discription.
+</details>
+</details>
 
 
