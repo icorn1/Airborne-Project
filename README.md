@@ -119,10 +119,7 @@ This is a guide to get the robot up and running with the code in this github. In
 
 </details>
 <br />
-<details><summary><b>### downloading the code</b></summary>
-      <br />
-      <details><summary><i>#### to download all the needed files onto the PC:</i></summary>
-  
+<details><summary><b>To download all the needed files onto the PC:</b></summary>
 Text
 </details>
 
