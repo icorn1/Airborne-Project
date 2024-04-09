@@ -175,8 +175,8 @@ def get_ply_information(contour, T, show_plot=False):
         optimize_grid_angle(contour, T)
 
     # Rotate grid points based on optimal rotation angle
-    rotation_matrix = np.array([[np.cos(optimal_rotation_angle), -np.sin(optimal_rotation_angle)],
-                                [np.sin(optimal_rotation_angle), np.cos(optimal_rotation_angle)]])
+    rotation_matrix = np.array([[np.cos(ANGLE), -np.sin(ANGLE)],
+                                [np.sin(ANGLE), np.cos(ANGLE)]])
     grid_points = grid_points[:, :2].T
     grid_points = np.dot(rotation_matrix, grid_points).T
 
