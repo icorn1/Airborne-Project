@@ -111,6 +111,9 @@ https://www.universal-robots.com/media/1802558/urcaps_style_guide-v10.pdf
 This URCap uses source code from another URCap, credits to https://github.com/BomMadsen/URCap-ScriptCommunicator.
 </details>
 
+
+<br /><br />
+
 ## User Manual
 
 This is a guide to get the robot up and running with the code in this github. In this user manual the assumption is made that all the electronics is connected such as visualised in the electrical circuit.
