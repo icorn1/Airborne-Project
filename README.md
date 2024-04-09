@@ -118,7 +118,7 @@ This is a guide to get the robot up and running with the code in this github. In
 
 ### downloading the code
 
-####To download all the needed files onto the PC:
+#### To download all the needed files onto the PC:
 
 All the python code from github needs to be downloaded onto a laptop or pc (this can also be a micro controller). Mind that the path locations of the files are correct or you will receive some errors, these can be fixed by giving the correct path locations. Make a folder named "calibration_data" in the same location as the python code and in this put "robot_poses.txt", "calibration_pictures" and the folder "calibration_matrices". In the folder "calibration_matrices" all the matrices are put. To get the genie nano camera working download "ImpactAcquire-x86_64-3.0.3.exe" from the following link: https://static.matrix-vision.com/mvIMPACT_Acquire/3.0.3/ 
 
