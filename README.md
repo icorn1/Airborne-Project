@@ -116,6 +116,16 @@ This URCap uses source code from another URCap, credits to https://github.com/Bo
 This is a guide to get the robot up and running with the code in this github. In this user manual the assumption is made that all the electronics is connected such as visualised in the electrical circuit.
 
 
+
+</details>
+<br />
+<details><summary><b>### downloading the code</b></summary>
+      <br />
+      <details><summary><i>#### to download all the needed files onto the PC:</i></summary>
+  
+Text
+</details>
+
 ### downloading the code
 
 #### To download all the needed files onto the PC:
