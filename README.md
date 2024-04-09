@@ -148,10 +148,7 @@ Ixent, can you write this?
 
 ### Changing variables in the python code
 
-</details>
-<br />
 <details><summary><b>ply detection</b></summary>
-	</details>
 	<br />
 	<details><summary><b>brightness threshold for ply detection</b></summary>
 location variable:
@@ -162,9 +159,8 @@ line:
 
 discription.
 </details>
-</details>
-<br />
-<details><summary><b>brightness threshold for ply detection</b></summary>
+	<br />
+	<details><summary><b>brightness threshold for ply detection</b></summary>
 location variable:
 	
 file:
