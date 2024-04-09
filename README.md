@@ -140,7 +140,7 @@ Download, from "URsript Code" on github, "main.script". This can be done by down
 </details>
 <br />
 <details><summary><b>Upload the GUI onto the universal robot:</b></summary>
-Ixent, can you write this?
+Under "Explanation of URCaps code" an elaborate explanation is given about how to install the GUI onto the UR.
 
 ------------------------------------------------------------------------
 </details>
