@@ -128,6 +128,8 @@ All the python code from github needs to be downloaded onto a laptop or pc (this
 
 Download, from "URsript Code" on github, "main.script". This can be done by downloading WinSCP. When opening WinSCP it will open a window "login". In this window click "New Site" and fill in the following data; Host name: 192.168.0.2 (the IP of the robot), User name: root, Password: easybot, Port number: 22, File protocol: SFTP. Your PC will most likely give a warning, you can ignore this.
 
+------------------------------------------------------------------------
+
 #### Upload the GUI onto the universal robot:
 
 Ixent, can you write this?
