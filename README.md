@@ -110,3 +110,12 @@ https://www.universal-robots.com/media/1802558/urcaps_style_guide-v10.pdf
 ## Credits
 This URCap uses source code from another URCap, credits to https://github.com/BomMadsen/URCap-ScriptCommunicator.
 </details>
+
+## User Manual
+
+This is a guide to get the robot up and running with the code in this github.
+
+### downloading the code
+
+All the python code needs to be downloaded and put together in the same file.
+
