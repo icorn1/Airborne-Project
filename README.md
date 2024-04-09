@@ -148,12 +148,11 @@ Ixent, can you write this?
 
 ### Changing variables in the python code
 
-<details><summary><b>ply detection</b></summary><br/>
+<details><summary><b>ply detection</b></summary>
 	<details><summary><b>brightness threshold for ply detection</b></summary>
 location variable:
 	
-file:
-	
+file:	
 line:
 
 discription.
