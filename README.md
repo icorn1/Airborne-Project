@@ -18,7 +18,7 @@ In this github, we aim to share the code for the project we (students from THUAS
 
 ## A Guide to the codes:
 
-<details><summary><b>Explanation of python code</b></summary>
+<details><summary><b>Explanation of the Python code</b></summary>
       <br />
       <details><summary><i>main_communication_code.py</i></summary>
             
@@ -101,10 +101,10 @@ The function calibrate() is used to preform an automatic calibration. The robot 
 ## How to compile and install the URCap
 You'll need a Linux based enviornment, with maven installed. Then, enter the URCaps Code folder, and from there run "mvn install -Premote" if you want to install it on to the robot, or "mvn install -P ursimvm" if you plan to do it on the URSimulator. <b>Keep in mind, you might need to adjust the IP addresses on the POM file! </b> You can find the full list of dependencies on the development guide below.
 
-I strongly suggest to check the development guide for URCaps if you want to develop your own URCap.
-Development guide:
-https://plus.universal-robots.com/media/1810567/urcap_tutorial_swing.pdf
-Style guide:
+We strongly suggest to check the development guide for URCaps if you want to develop your own URCap. <br>
+<b> Development guide: </b>
+https://plus.universal-robots.com/media/1810567/urcap_tutorial_swing.pdf <br>
+<b> Style guide: </b>
 https://www.universal-robots.com/media/1802558/urcaps_style_guide-v10.pdf
 
 ## Credits
@@ -112,88 +112,40 @@ This URCap uses source code from another URCap, credits to https://github.com/Bo
 </details>
 
 
-<br /><br />
+<br />
 
 ## User Manual
 
-This is a guide to get the robot up and running with the code in this github. In this user manual the assumption is made that all the electronics is connected such as visualised in the electrical circuit.
+This is a guide to get the robot up and running with the code in this GitHub repository. In this user manual, the assumption is made that all the electronics are connected as visualized in the electrical circuit.
 
+---
 
+### Downloading the code
 
+<details>
+<summary><b>Downloading all the needed files onto the PC:</b></summary>
 
-
-### downloading the code
-
-</details>
-<br />
-<details><summary><b>Downloading all the needed files onto the PC:</b></summary>
-All the python code from github needs to be downloaded onto a laptop or pc (this can also be a micro controller). Mind that the path locations of the files are correct or you will receive some errors, these can be fixed by giving the correct path locations. Make a folder named "calibration_data" in the same location as the python code and in this put "robot_poses.txt", "calibration_pictures" and the folder "calibration_matrices". In the folder "calibration_matrices" all the matrices are put. To get the genie nano camera working download "ImpactAcquire-x86_64-3.0.3.exe" from the following link: https://static.matrix-vision.com/mvIMPACT_Acquire/3.0.3/ 
-
-------------------------------------------------------------------------
-</details>
+All the Python code from GitHub needs to be downloaded onto a laptop or PC (this can also be a microcontroller). Make sure that the path locations of the files are correct, or you will receive errors. These can be fixed by providing the correct path locations. Create a folder named "calibration_data" in the same location as the Python code and put "robot_poses.txt", "calibration_pictures", and the folder "calibration_matrices" in it. In the "calibration_matrices" folder, all the matrices are stored. To get the Genie Nano camera working, download "ImpactAcquire-x86_64-3.0.3.exe" from the following link: [ImpactAcquire Download](https://static.matrix-vision.com/mvIMPACT_Acquire/3.0.3/)
 
 </details>
-<br />
-<details><summary><b>Downloading all the needed files onto the universal robot:</b></summary>
-Download, from "URsript Code" on github, "main.script". This can be done by downloading WinSCP. When opening WinSCP it will open a window "login". In this window click "New Site" and fill in the following data; Host name: 192.168.0.2 (the IP of the robot), User name: root, Password: easybot, Port number: 22, File protocol: SFTP. Your PC will most likely give a warning, you can ignore this.
 
-------------------------------------------------------------------------
+<details>
+<summary><b>Downloading all the needed files onto the universal robot:</b></summary>
+
+Download "main.script" from the "URscript Code" section on GitHub. This can be done by downloading WinSCP. When opening WinSCP, it will prompt a "login" window. Click "New Site" in this window and fill in the following data:
+- Host name: 192.168.0.2 (the IP of the robot)
+- User name: root
+- Password: easybot
+- Port number: 22
+- File protocol: SFTP
+
+Your PC will most likely give a warning; you can ignore this.
+
 </details>
 
-</details>
-<br />
-<details><summary><b>Upload the GUI onto the universal robot:</b></summary>
-Under "Explanation of URCaps code" an elaborate explanation is given about how to install the GUI onto the UR.
+<details>
+<summary><b>Upload the GUI onto the universal robot:</b></summary>
 
-------------------------------------------------------------------------
-</details>
+Under "Explanation of URCaps code", there is an elaborate explanation of how to install the GUI onto the UR.
 
-
-### Changing variables in the python code
-
-<details><summary><b>ply detection</b></summary>
-	<details><summary><b>&ensp;  brightness threshold for ply detection</b></summary>
-		
-location variable:
-	
-file:	
-
-line:
-
-discription.
-</details>
-	<details><summary><b>&ensp;  ...</b></summary>
-		
-location variable:
-	
-file:
-	
-line:
-
-discription.
-</details>
-</details>
-
-
-<details><summary><b>work environment</b></summary>
-	<details><summary><b>&ensp;  reach thresshold</b></summary>
-		
-location variable:
-	
-file:	
-
-line:
-
-discription.
-</details>
-	<details><summary><b>&ensp;  ...</b></summary>
-		
-location variable:
-	
-file:
-	
-line:
-
-discription.
-</details>
 </details>
