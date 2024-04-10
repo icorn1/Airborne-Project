@@ -4,7 +4,7 @@ import cv2
 
 ACCURACY = 11  # Pixels
 SCALING_FACTOR = 1.475  # The PNG generated from the DXF has a scale X times bigger than the images from the camera
-ANGLE_OPTIMIZATION_ITERATIONS = 200
+ANGLE_OPTIMIZATION_ITERATIONS = 200  # The ammount of angles that are tried for finding the best angle. Affects the angle step size
 
 
 def plot(img, cnts, fail_point_inds_per_cnt, trans_model_contour_points):
