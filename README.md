@@ -152,7 +152,7 @@ Under "Explanation of URCaps code" an elaborate explanation is given about how t
 ### Changing variables in the python code
 
 <details><summary><b>ply detection</b></summary>
-	<details><summary><b>brightness threshold for ply detection</b></summary>
+	<details><summary><b>  brightness threshold for ply detection</b></summary>
 		
 location variable:
 	
@@ -162,7 +162,7 @@ line:
 
 discription.
 </details>
-	<details><summary><b>...</b></summary>
+	<details><summary><b>  ...</b></summary>
 		
 location variable:
 	
@@ -176,7 +176,7 @@ discription.
 
 
 <details><summary><b>work environment</b></summary>
-	<details><summary><b>reach thresshold</b></summary>
+	<details><summary><b>  reach thresshold</b></summary>
 		
 location variable:
 	
@@ -186,7 +186,7 @@ line:
 
 discription.
 </details>
-	<details><summary><b>...</b></summary>
+	<details><summary><b>  ...</b></summary>
 		
 location variable:
 	
