@@ -11,34 +11,34 @@ import numpy as np
 import warnings
 import socket
 import snap7
-import os
 import cv2
+import os
 
 # Variables
-IP_HOST = '192.168.0.11'
-PORT_UR = 50001
+IP_HOST = '192.168.0.11'  # The ip adress of the laptop/pc
+PORT_UR = 50001  # The port used on the UR
 IMAGE_FOLDER = 'calibration_images'  # The folder where the calibration images are saved
 ROBOT_POSES_FILENAME = 'robot_poses/grid_points.txt'  # The file where the robot poses are saved
 INTRINSIC_MATRIX_FILENAME = 'calibration_matrices/IntrinsicMatrix.npz'  # The filename of the intrinsic matrix
 DISTORTION_MATRIX_FILENAME = 'calibration_matrices/DistortionMatrix.npz'  # The filename of the distortion matrix
 DETECTED_CORNERS_FOLDER = 'DetectedCorners'  # The filename where the detected corners images are saved to
 TRANSLATION_MATRIX_FILENAME = 'calibration_matrices/Translation.npz'  # The filename of the tranlsation matrix
-CONTOUR_FOLDER = 'contours'
-LAMINATES_FOLDER = 'laminates'
-CTI_FILE_PATH = "C:/Program Files/Balluff/ImpactAcquire/bin/x64/mvGenTLProducer.cti"
-SERIAL_NUMBER_CAM1 = 'S1129824'
-SERIAL_NUMBER_CAM2 = 'S1126491'
-NUMBER_OF_VACUUM_CUPS = 24
-DROPOFF_X = -.480
-DROPOFF_Y = -.317
-Y_COLLISION_THRESHOLD = -.260
-MASKING_THRESHOLD = 160
-INVERT_MASK = 0
-MINIMUM_CONTOUR_AREA = 10000
-PLC_IP = '192.168.0.1'
-DATABASE_RACK = 0
-DATABASE_SLOT = 1
-PLC_PORT = 102
+CONTOUR_FOLDER = 'contours'  # The folder where the contours are stored
+LAMINATES_FOLDER = 'laminates'  # The folder where the laminates are stored
+CTI_FILE_PATH = "C:/Program Files/Balluff/ImpactAcquire/bin/x64/mvGenTLProducer.cti"  # The filepath to the CTI file
+SERIAL_NUMBER_CAM1 = 'S1129824'  # The serial number of the camera which sees the plies
+SERIAL_NUMBER_CAM2 = 'S1126491'  # The serial number of the camera which sees the laminates
+NUMBER_OF_VACUUM_CUPS = 24  # The number of vacuum cups
+DROPOFF_X = -.480  # The x location where the laminate is formed
+DROPOFF_Y = -.317  # The y location where the laminate is formed
+Y_COLLISION_THRESHOLD = -.260  # The y value from which the robot crashes into itself
+MASKING_THRESHOLD = 160  # The masking threshold to detect the contours
+INVERT_MASK = 0  # Whether to invert the mask
+MINIMUM_CONTOUR_AREA = 10000  # The minimum area in pixels^2 of the contours
+PLC_IP = '192.168.0.1'  # The ip adres of the PLC
+DATABASE_RACK = 0  # The database rack of the PLC
+DATABASE_SLOT = 1  # The database slot of the PLC
+PLC_PORT = 102  # Which PLC port is used
 
 
 def format_nums(values):
