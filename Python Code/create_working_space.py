@@ -2,13 +2,13 @@ import numpy as np
 from shapely.geometry import Point, Polygon
 
 # Define the parameters of the quarter circle
-LOWER_LINE_HEIGHT = 380
-UPPER_LINE_HEIGHT = 633
-LINE_START = -724
-LINE_END = 108
-CIRCLE_START = -413
-CIRCLE_END = -76
-CIRCLE_RADIUS = 290
+LOWER_LINE_HEIGHT = 380  # The height of the lower line
+UPPER_LINE_HEIGHT = 633  # The height of the upper line
+LINE_START = -724  # The x start value of the working space
+LINE_END = 108  # The x ending value of the working space
+CIRCLE_START = -413  # The x value for the center of the left circle
+CIRCLE_END = -76  # The x value for the center of the right circle
+CIRCLE_RADIUS = 290  # The radius of both circles
 
 
 def create_working_region():
