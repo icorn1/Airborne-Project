@@ -130,7 +130,7 @@ All the Python code from GitHub needs to be downloaded onto a laptop or PC (this
 </details>
 
 <details>
-<summary><b>Downloading all the needed files onto the universal robot:</b></summary>
+<summary><b>Downloading the robot script onto the universal robot:</b></summary>
 
 Download "main.script" from the "URscript Code" section on GitHub. This can be done by downloading WinSCP. When opening WinSCP, it will prompt a "login" window. Click "New Site" in this window and fill in the following data:
 - Host name: 192.168.0.2 (the IP of the robot)
@@ -140,6 +140,7 @@ Download "main.script" from the "URscript Code" section on GitHub. This can be d
 - File protocol: SFTP
 
 Your PC will most likely give a warning; you can ignore this.
+Now, you need to copy the file to /programs, and then you can use the script in the "Program" section of the UR GUI. Keep in mind that this method is not used in our demonstration, we instead load the script from the GUI, which can be seen in detail in the "GUI" section of this readme.
 
 </details>
 
